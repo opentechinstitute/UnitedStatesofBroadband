@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>USBB Map: Vector Tile</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+
+		.map-overlay {
+		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+		position: absolute;
+		width: 30%;
+		top: 0;
+		left: 0;
+		padding: 10px;
+		}
+		 
+		.map-overlay .map-overlay-inner {
+		background-color: #fff;
+		box-shadow:0 1px 2px rgba(0, 0, 0, 0.20);
+		border-radius: 3px;
+		padding: 10px;
+		margin-bottom: 10px;
+		}
+		 
+		.map-overlay h2 {
+		line-height: 24px;
+		display: block;
+		margin: 0 0 10px;
+		}
+		 
+		.map-overlay .legend .bar {
+		height: 10px;
+		width: 100%;
+		background: linear-gradient(to right, #FCA107, #7F3121);
+		}
+		 
+		.map-overlay input {
+		background-color: transparent;
+		display: inline-block;
+		width: 100%;
+		position: relative;
+		margin: 0;
+		cursor: ew-resize;
+		}
+
+		input[type=radio] {
+			display: inline-block;
+		}
+
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+
+<div class='map-overlay top'>
+	<div class='map-overlay-inner'>
+		<h2>United States of Broadband</h2>
+		Area: <select id="geo" name="geo">
+		  <option value="county">County</option>
+		  <option value="state_house">State House</option>
+		  <option value="state_senate">State Senate</option>
+		  <option value="census_tract">Census Tract</option>
+		  <option value="zcta">Zip Code</option>
+		</select>
+
+		<br/>
+		Dataset: <select id="data" name="data">
+		  <option value="mlab" id="mlab">Measurement Lab</option>
+		  <option value="fcc" id="fcc">FCC 477</option>
+		</select> 
+
+		<br/>
+		Time Period: <label id='time_period'></label>
+		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
+
+		Measurement: <select id="measurement" name="measurement">
+		  <option value="download_Mbps_">Download</option>
+		  <option value="upload_Mbps_">Upload</option>
+		  <option value="min_rtt_">RTT</option>
+		  <option value="dl_count_tests_">Download Tests (count)</option>
+		  <option value="ul_count_tests_">Upload Tests (count)</option>
+		  <option value="dl_count_ips_">Download IPs (count)</option>
+		  <option value="ul_count_ips_">Upload IPs (count)</option>
+		</select>
+
+	</div>
+	<div class='map-overlay-inner'>
+		<div id='legend' class='legend'>
+			<div class='bar'></div>
+			<div>(Mbps)</div>
+		</div>
+	</div>
+</div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvcmdpYWJ1bGxlbiIsImEiOiIwa05xRlU4In0.EkFrVKcwSmgBSjvXVRR83A';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v10',
+    zoom: 4,
+    center: [-97.754807, 38.674870]
+});
+
+var time_periods = [['dec_2014','Dec 2014'],
+					['jun_2015','Jun 2015'],
+					['dec_2015','Dec 2015'],
+					['jun_2016','Jun 2016'],
+					['dec_2016','Dec 2016'],
+					['jun_2017','Jun 2017'],
+					['dec_2017','Dec 2017'],
+					['jun_2018','Jun 2018'],
+					['dec_2018','Dec 2018']];
+
+var ramps = {
+	'download_Mbps_': [0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'],
+	'upload_Mbps_': [0, '#fff',
+				5, '#EED322',
+				10, '#E6B71E',
+				20, '#B86B25',
+				30, '#8B4225',
+				50, '#723122'],
+	'min_rtt_': [0, '#fff',
+				25, '#EED322',
+				50, '#E6B71E',
+				75, '#B86B25',
+				100, '#8B4225',
+				300, '#723122'],
+	'dl_count_tests_': [100, '#fff',
+				500, '#EED322',
+				1000, '#E6B71E',
+				5000, '#B86B25',
+				10000, '#8B4225',
+				25000, '#723122'],
+	'ul_count_tests_': [100, '#fff',
+				500, '#EED322',
+				1000, '#E6B71E',
+				5000, '#B86B25',
+				10000, '#8B4225',
+				25000, '#723122']
+				//add ips
+};
+
+function makeColorRamp(){
+//function makeColorRamp(data, geo, measurement, time_period){
+		var time_period = time_periods[document.getElementById('slider').value];
+		var measure = document.getElementById('measurement').value;
+		var field = 'ml_' + measure + time_period[0];
+
+		var ramp =	[ 'interpolate',
+				['linear'],
+				['get', field],
+			];
+		ramp = ramp.concat(ramps[measure]);
+
+		map.setPaintProperty('mlab_county','fill-color',ramp);
+		
+		//filter out nulls
+		var filter = ["has",field];
+		map.setFilter('mlab_county',filter);
+
+		// Set the label to the month
+		document.getElementById('time_period').textContent = time_period[1];
+}
+
+
+map.on('load', function () {
+
+    map.addLayer({
+        "id": "mlab_county",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://georgiabullen.3ikq9wa6'
+        },
+        "source-layer": "mlab_county_dec2014_dec2018",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    // When a click event occurs on a feature in the states layer, open a popup at the
+	// location of the click, with description HTML from its properties.
+	map.on('click', 'mlab_county', function (e) {
+	new mapboxgl.Popup()
+		.setLngLat(e.lngLat)
+		.setHTML(
+
+			'<h2>' + e.features[0].properties['county_name'] +'</h2>' +
+			'<em>Source:'+ document.getElementById('data').value + '</em>'+
+			'<h3>Download Speeds:</h3>'+
+			'<strong>Dec 2014: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2014'] + ' Mbps <br/>' +
+			'<strong>Jun 2015: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2015'] + ' Mbps <br/>' +
+			'<strong>Dec 2015: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2015'] + ' Mbps <br/>' +
+			'<strong>Jun 2016: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2016'] + ' Mbps <br/>' +
+			'<strong>Dec 2016: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2016'] + ' Mbps <br/>' +
+			'<strong>Jun 2017: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2017'] + ' Mbps <br/>' +
+			'<strong>Dec 2017: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2017'] + ' Mbps <br/>' +
+			'<strong>Jun 2018: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2018'] + ' Mbps <br/>' +
+			'<strong>Dec 2018: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2018'] + ' Mbps <br/>' +
+			'<h3>Upload Speeds:</h3>'+
+			'<strong>Dec 2014: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2014'] + ' Mbps <br/>' +
+			'<strong>Jun 2015: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2015'] + ' Mbps <br/>' +
+			'<strong>Dec 2015: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2015'] + ' Mbps <br/>' +
+			'<strong>Jun 2016: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2016'] + ' Mbps <br/>' +
+			'<strong>Dec 2016: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2016'] + ' Mbps <br/>' +
+			'<strong>Jun 2017: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2017'] + ' Mbps <br/>' +
+			'<strong>Dec 2017: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2017'] + ' Mbps <br/>' +
+			'<strong>Jun 2018: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2018'] + ' Mbps <br/>' +
+			'<strong>Dec 2018: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2018'] + ' Mbps <br/>'
+			)
+		.addTo(map);
+	});
+	 
+	// Change the cursor to a pointer when the mouse is over the states layer.
+	map.on('mouseenter', 'mlab_county', function () {
+	map.getCanvas().style.cursor = 'pointer';
+	});
+	 
+	// Change it back to a pointer when it leaves.
+	map.on('mouseleave', 'mlab_county', function () {
+	map.getCanvas().style.cursor = '';
+	});
+
+	// Run the color ramp to start
+	makeColorRamp();
+
+	// change things based on selection in the legend
+	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); });
+	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); });
+
+});
+</script>
+
+</body>
+</html>
