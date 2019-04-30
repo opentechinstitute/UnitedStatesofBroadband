@@ -3,8 +3,8 @@ Notes for USBB Process
 ## Overview
 1. Use the geo functions in BigQuery to aggregate the data to geographic areas 
 2. Export that to geojson (or csv)
-3. Use [tippecanoe](https://github.com/mapbox/tippecanoe) to generate MBTiles of the results, and 
-4. use openmaptiles to serve them up to the application. Locally can use `klokantech/tileserver-gl` to serve your mbtiles file. Openmaptiles docker container sets up an account and downloads tiles from their service. Stuart shared this command: `docker run --rm -it -v $(pwd):/data -p 8080:80 klokantech/tileserver-gl` or you can use Kitematic/Docker to run the docker container.
+3. Use ogr2ogr + [tippecanoe](https://github.com/mapbox/tippecanoe) to generate MBTiles of the results, and 
+4. use Mapbox or openmaptiles to serve them up to the application. Locally can use `klokantech/tileserver-gl` to serve your mbtiles file. Openmaptiles docker container sets up an account and downloads tiles from their service. Stuart shared this command: `docker run --rm -it -v $(pwd):/data -p 8080:80 klokantech/tileserver-gl` or you can use Kitematic/Docker to run the docker container.
 
 
 ## Data Sets
@@ -21,13 +21,18 @@ Notes for USBB Process
 
 ## Time Periods, as defined by the FCC data sets
 
-Dec 2014 = BETWEEN '2014-07-01' AND '2014-12-31'
-Jun 2015 = BETWEEN '2015-01-01' AND '2015-06-30'
-Dec 2015 = BETWEEN '2015-07-01' AND '2015-12-31'
-Jun 2016 = BETWEEN '2016-01-01' AND '2016-06-30'
-Dec 2016 = BETWEEN '2016-07-01' AND '2016-12-31'
-Jun 2017 = BETWEEN '2017-01-01' AND '2017-06-30'
-Coming soon: Dec 2017 = BETWEEN '2017-07-01' AND '2017-12-31'
+1. Dec 2014 = BETWEEN '2014-07-01' AND '2014-12-31'
+2. Jun 2015 = BETWEEN '2015-01-01' AND '2015-06-30'
+3. Dec 2015 = BETWEEN '2015-07-01' AND '2015-12-31'
+4. Jun 2016 = BETWEEN '2016-01-01' AND '2016-06-30'
+5. Dec 2016 = BETWEEN '2016-07-01' AND '2016-12-31'
+6. Jun 2017 = BETWEEN '2017-01-01' AND '2017-06-30'
+
+Available in M-Lab, but not in the FCC data:
+
+7. Coming soon: Dec 2017 = BETWEEN '2017-07-01' AND '2017-12-31'
+8. Coming soon: Jun 2018 = BETWEEN '2018-01-01' AND '2018-06-30'
+9. Coming soon: Dec 2018 = BETWEEN '2018-07-01' AND '2018-12-31'
 
 ## M-Lab Data
 
@@ -147,8 +152,7 @@ from here: [https://gis.stackexchange.com/questions/55239/which-census-geography
 1. Query M-Lab data, case by time period, spatial joined to geometry in BQ
 2. Save to table
 3. Export table as CSV
-4. ogr2ogr SQL query to join data & shapefile to create geosjon with geometry and data
-5. tippecanoe to create mbtiles from geojson
+4. ogr2ogr to tippecanoe to create mbtiles from geojson
 6. Repeat for each geometry
 
 ### FCC Data
@@ -158,24 +162,8 @@ from here: [https://gis.stackexchange.com/questions/55239/which-census-geography
 3. tbd.
 
 
-## Making Tiles
+## Making Tiles: tippecanoe+ogr2ogr from csv to mbtiles
 
-### ogr2ogr to go from shapedata to geojson
-
-#### shp > geojson in ogr2ogr
-`ogr2ogr -f GeoJSON tl_2016_us_county.geojson tl_2016_us_county.shp`
-
-#### GEOID join on shp > geojson in ogr2ogr
-```sh
-ogr2ogr -f GeoJSON mlab_county.geojson USBB-2/data/county_mlab_2015_2018.csv -sql "SELECT * FROM county_mlab_2015_2018 c JOIN 'USBB-2/shapefiles/tl_2016_us_county/tl_2016_us_county.shp'.tl_2016_us_county s on c.GEOID = s.GEOID"
-```
-
-### tippecanoe from geojson > mbtiles
-
-`tippecanoe -zg -o tl_2016_us_county.mbtiles --drop-densest-as-needed --extend-zooms-if-still-dropping tl_2016_us_county.geojson`
-
-
-### tippecanoe+ogr2ogr from csv to mbtiles
 By specifying `/dev/stdout` as the output file for ogr2ogr and specifying `/dev/stdin` as the input file for tippecanoe both can be part of a Unix pipeline.
 
 `-oo KEEP_GEOM_COLUMNS` avoids ogr2ogr including the WKT-encoded geometry in the output; it's a waste to keep it because we have the GeoJSON geometry instead.
@@ -205,7 +193,3 @@ $ xsv select '!WKT' mlab_county_dec2014_dec2018_429.csv | \
 $ echo '"WKT"' >> mlab_county_dec2014_dec2018_429.csvt
 ```
 
-
-
-gsutil cp gs://georgiabullen/USB_Shapefiles/* ./
-gsutil cp gs://georgiabullen/USB_FCC_477/* ./
