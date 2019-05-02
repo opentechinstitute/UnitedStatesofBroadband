@@ -52,6 +52,33 @@
 			display: inline-block;
 		}
 
+		.session {
+		  margin-bottom: 20px;
+		}
+
+		.row {
+		  height: 10px;
+		  width: 100%;
+		}
+
+		.colors {
+		  background: linear-gradient(to right, #2dc4b2, #3bb3c3, #669ec4, #8b88b6, #a2719b, #aa5e79, #2dc4b2);
+		  margin-bottom: 5px;
+		}
+
+		.label {
+		  width: 15%;
+		  display: inline-block;
+		  text-align: center;
+		}
+		#console {
+		  position: absolute;
+		  width: 240px;
+		  margin: 10px;
+		  padding: 10px 20px;
+		  background-color: white;
+		}
+
     </style>
 </head>
 <body>
@@ -90,11 +117,33 @@
 		</select>
 
 	</div>
-	<div class='map-overlay-inner'>
-		<div id='legend' class='legend'>
-			<div class='bar'></div>
-			<div>(Mbps)</div>
+	
+	<div class='map-overlay-inner' >
+		<div class='session'>
+		  <h3>Data Range</h3>
+		  Units: (Mbps)
+		  <div id='legend' class='row colors'>
+		  </div>
+		  <div id="legendlabel" class='row labels'>
+		    <div class='label'>0</div>
+		    <div class='label'>0</div>
+		    <div class='label'>0</div>
+		    <div class='label'>0</div>
+		    <div class='label'>0</div>
+		    <div class='label'>0</div>
+		  </div>
 		</div>
+		<!-- <div class='session'>
+		  <h3>Day of the week</h3>
+		  <div class='row' id='filters'>
+		    <input id='all' type='radio' name='toggle' value='all' checked='checked'>
+		    <label for='all'>All</label>
+		    <input id='weekday' type='radio' name='toggle' value='weekday'>
+		    <label for='weekday'>Weekday</label>
+		    <input id='weekend' type='radio' name='toggle' value='weekend'>
+		    <label for='weekend'>Weekend</label>
+		  </div>
+		</div> -->
 	</div>
 </div>
 
@@ -174,7 +223,30 @@ function makeColorRamp(){
 			];
 		ramp = ramp.concat(ramps[measure]);
 
+		//update map colors
 		map.setPaintProperty(geo_layer,'fill-color',ramp);
+
+		var legend_values = ramps[measure];
+
+		let cssRamp	= "";
+        for(var i=1; i<legend_values.length; i+=2){
+        	cssRamp = cssRamp + "," + legend_values[i];
+        }
+        cssRamp = 'linear-gradient(to right' + cssRamp + ')';
+		
+        //update legend colors
+		document.getElementById('legend').style.background = cssRamp;
+
+        let cssLabels = [];
+        for(var i=0; i<legend_values.length; i+=2){
+        	cssLabels.push(legend_values[i]);
+        }
+
+		//update legend values
+		var c = document.getElementById('legendlabel').children;
+		for (var l in cssLabels) {
+		    c[l].innerHTML = cssLabels[l];
+		}
 
 		//show one layer
 		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house']){
