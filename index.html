@@ -52,10 +52,53 @@
 			display: inline-block;
 		}
 
+		#menu {
+		background: #fff;
+		position: absolute;
+		z-index: 1;
+		top: 10px;
+		right: 10px;
+		border-radius: 3px;
+		width: 120px;
+		border: 1px solid rgba(0,0,0,0.4);
+		font-family: 'Open Sans', sans-serif;
+		}
+		 
+		#menu a {
+		font-size: 13px;
+		color: #404040;
+		display: block;
+		margin: 0;
+		padding: 0;
+		padding: 10px;
+		text-decoration: none;
+		border-bottom: 1px solid rgba(0,0,0,0.25);
+		text-align: center;
+		}
+		 
+		#menu a:last-child {
+		border: none;
+		}
+		 
+		#menu a:hover {
+		background-color: #f8f8f8;
+		color: #404040;
+		}
+		 
+		#menu a.active {
+		background-color: #3887be;
+		color: #ffffff;
+		}
+		 
+		#menu a.active:hover {
+		background: #3074a4;
+		}
+
     </style>
 </head>
 <body>
 
+<nav id="menu"></nav>
 <div id='map'></div>
 
 <div class='map-overlay top'>
@@ -99,7 +142,7 @@
 </div>
 
 <script>
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvcmdpYWJ1bGxlbiIsImEiOiIwa05xRlU4In0.EkFrVKcwSmgBSjvXVRR83A';
+mapboxgl.accessToken = 'pk.eyJ1IjoibmV3YW1lcmljYSIsImEiOiIyM3ZnYUtrIn0.57fFgg_iM7S1wLH2GQC71g';
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v10',
@@ -147,12 +190,23 @@ var ramps = {
 				1000, '#E6B71E',
 				5000, '#B86B25',
 				10000, '#8B4225',
+				25000, '#723122'],
+	'dl_count_ips_': [100, '#fff',
+				500, '#EED322',
+				1000, '#E6B71E',
+				5000, '#B86B25',
+				10000, '#8B4225',
+				25000, '#723122'],
+	'ul_count_ips_': [100, '#fff',
+				500, '#EED322',
+				1000, '#E6B71E',
+				5000, '#B86B25',
+				10000, '#8B4225',
 				25000, '#723122']
-				//add ips
 };
 
 function makeColorRamp(){
-//function makeColorRamp(data, geo, measurement, time_period){
+		var geo_layer = document.getElementById('data').value + '_' + document.getElementById('geo').value;
 		var time_period = time_periods[document.getElementById('slider').value];
 		var measure = document.getElementById('measurement').value;
 		var field = 'ml_' + measure + time_period[0];
@@ -163,11 +217,17 @@ function makeColorRamp(){
 			];
 		ramp = ramp.concat(ramps[measure]);
 
-		map.setPaintProperty('mlab_county','fill-color',ramp);
+		map.setPaintProperty(geo_layer,'fill-color',ramp);
+
+		//show one layer
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house']){
+			map.setLayoutProperty(lyr,'visibility','none');
+		};
+		map.setLayoutProperty(geo_layer,'visibility','visible');
 		
 		//filter out nulls
 		var filter = ["has",field];
-		map.setFilter('mlab_county',filter);
+		map.setFilter(geo_layer,filter);
 
 		// Set the label to the month
 		document.getElementById('time_period').textContent = time_period[1];
@@ -181,10 +241,13 @@ map.on('load', function () {
         "type": "fill",
         "source": {
             type: 'vector',
-            url: 'mapbox://georgiabullen.3ikq9wa6'
+            url: 'mapbox://newamerica.d02bt0xr'
         },
         "source-layer": "mlab_county_dec2014_dec2018",
         "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
         "paint": {
             "fill-opacity": 0.7,
             //"fill-outline-color": '#000',
@@ -202,47 +265,170 @@ map.on('load', function () {
         }
     });
 
+    map.addLayer({
+        "id": "mlab_zcta",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.2lv667iu'
+        },
+        "source-layer": "mlab_zcta_2014_2018_0430",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "mlab_census_tract",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.5l0a8uxx'
+        },
+        "source-layer": "mlab_census_tracts_2014_2018_0430",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "mlab_state_senate",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.cnjwiilp'
+        },
+        "source-layer": "mlab_statesenate_2014_2018_0430",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "mlab_state_house",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.8un1iy50'
+        },
+        "source-layer": "mlab_state_house_2014_2018_0430",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+
     // When a click event occurs on a feature in the states layer, open a popup at the
 	// location of the click, with description HTML from its properties.
-	map.on('click', 'mlab_county', function (e) {
-	new mapboxgl.Popup()
-		.setLngLat(e.lngLat)
-		.setHTML(
 
-			'<h2>' + e.features[0].properties['county_name'] +'</h2>' +
-			'<em>Source:'+ document.getElementById('data').value + '</em>'+
-			'<h3>Download Speeds:</h3>'+
-			'<strong>Dec 2014: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2014'] + ' Mbps <br/>' +
-			'<strong>Jun 2015: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2015'] + ' Mbps <br/>' +
-			'<strong>Dec 2015: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2015'] + ' Mbps <br/>' +
-			'<strong>Jun 2016: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2016'] + ' Mbps <br/>' +
-			'<strong>Dec 2016: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2016'] + ' Mbps <br/>' +
-			'<strong>Jun 2017: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2017'] + ' Mbps <br/>' +
-			'<strong>Dec 2017: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2017'] + ' Mbps <br/>' +
-			'<strong>Jun 2018: </strong> ' + e.features[0].properties['ml_download_Mbps_jun_2018'] + ' Mbps <br/>' +
-			'<strong>Dec 2018: </strong> ' + e.features[0].properties['ml_download_Mbps_dec_2018'] + ' Mbps <br/>' +
-			'<h3>Upload Speeds:</h3>'+
-			'<strong>Dec 2014: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2014'] + ' Mbps <br/>' +
-			'<strong>Jun 2015: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2015'] + ' Mbps <br/>' +
-			'<strong>Dec 2015: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2015'] + ' Mbps <br/>' +
-			'<strong>Jun 2016: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2016'] + ' Mbps <br/>' +
-			'<strong>Dec 2016: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2016'] + ' Mbps <br/>' +
-			'<strong>Jun 2017: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2017'] + ' Mbps <br/>' +
-			'<strong>Dec 2017: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2017'] + ' Mbps <br/>' +
-			'<strong>Jun 2018: </strong> ' + e.features[0].properties['ml_upload_Mbps_jun_2018'] + ' Mbps <br/>' +
-			'<strong>Dec 2018: </strong> ' + e.features[0].properties['ml_upload_Mbps_dec_2018'] + ' Mbps <br/>'
-			)
-		.addTo(map);
+	var popup = new mapboxgl.Popup();
+
+	map.on('click', function (e) {
+		 let f = map.queryRenderedFeatures(e.point);
+		// if (f.length) {
+		// 	showPopup(f[0]);
+		// }
+			
+		popup.setLngLat(e.lngLat)
+			.setHTML(
+				'<h2>' + f[0].properties['county_name'] +'</h2>' +
+				'<em>Source:'+ document.getElementById('data').value + '</em>'+
+				'<h3>Download Speeds:</h3>'+
+				'<strong>Dec 2014: </strong> ' + f[0].properties['ml_download_Mbps_dec_2014'] + ' Mbps <br/>' +
+				'<strong>Jun 2015: </strong> ' + f[0].properties['ml_download_Mbps_jun_2015'] + ' Mbps <br/>' +
+				'<strong>Dec 2015: </strong> ' + f[0].properties['ml_download_Mbps_dec_2015'] + ' Mbps <br/>' +
+				'<strong>Jun 2016: </strong> ' + f[0].properties['ml_download_Mbps_jun_2016'] + ' Mbps <br/>' +
+				'<strong>Dec 2016: </strong> ' + f[0].properties['ml_download_Mbps_dec_2016'] + ' Mbps <br/>' +
+				'<strong>Jun 2017: </strong> ' + f[0].properties['ml_download_Mbps_jun_2017'] + ' Mbps <br/>' +
+				'<strong>Dec 2017: </strong> ' + f[0].properties['ml_download_Mbps_dec_2017'] + ' Mbps <br/>' +
+				'<strong>Jun 2018: </strong> ' + f[0].properties['ml_download_Mbps_jun_2018'] + ' Mbps <br/>' +
+				'<strong>Dec 2018: </strong> ' + f[0].properties['ml_download_Mbps_dec_2018'] + ' Mbps <br/>' +
+				'<h3>Upload Speeds:</h3>'+
+				'<strong>Dec 2014: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2014'] + ' Mbps <br/>' +
+				'<strong>Jun 2015: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2015'] + ' Mbps <br/>' +
+				'<strong>Dec 2015: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2015'] + ' Mbps <br/>' +
+				'<strong>Jun 2016: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2016'] + ' Mbps <br/>' +
+				'<strong>Dec 2016: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2016'] + ' Mbps <br/>' +
+				'<strong>Jun 2017: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2017'] + ' Mbps <br/>' +
+				'<strong>Dec 2017: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2017'] + ' Mbps <br/>' +
+				'<strong>Jun 2018: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2018'] + ' Mbps <br/>' +
+				'<strong>Dec 2018: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2018'] + ' Mbps <br/>'
+				)
+			.addTo(map);
 	});
 	 
 	// Change the cursor to a pointer when the mouse is over the states layer.
 	map.on('mouseenter', 'mlab_county', function () {
-	map.getCanvas().style.cursor = 'pointer';
+		map.getCanvas().style.cursor = 'pointer';
 	});
 	 
 	// Change it back to a pointer when it leaves.
 	map.on('mouseleave', 'mlab_county', function () {
-	map.getCanvas().style.cursor = '';
+		map.getCanvas().style.cursor = '';
 	});
 
 	// Run the color ramp to start
@@ -251,6 +437,8 @@ map.on('load', function () {
 	// change things based on selection in the legend
 	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); });
 	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); });
+	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); });
+	document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); });
 
 });
 </script>
