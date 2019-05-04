@@ -90,6 +90,7 @@
 		<h2>United States of Broadband</h2>
 		Area: <select id="geo" name="geo">
 		  <option value="county">County</option>
+		  <option value="congress">Congressional Districts</option>
 		  <option value="state_house">State House</option>
 		  <option value="state_senate">State Senate</option>
 		  <option value="census_tract">Census Tract</option>
@@ -249,7 +250,7 @@ function makeColorRamp(){
 		}
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -389,6 +390,35 @@ map.on('load', function () {
             url: 'mapbox://newamerica.8un1iy50'
         },
         "source-layer": "mlab_state_house_2014_2018_0430",
+        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "mlab_congress",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.adctm77h'
+        },
+        "source-layer": "mlab_stats_by_congress_district",
         "filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'

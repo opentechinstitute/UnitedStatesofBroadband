@@ -1,3 +1,14 @@
+TODO
+
+1) fix zcta rendering
+2) fix census tracts rendering
+3) fcc data
+4) figure out appropriate breaks
+5) include ross' NN layer
+6) include ross' fly-to code
+7) NTH: encode the selections in the URL so that views can be shared
+
+
 Notes for USBB Process
 
 ## more mapping notes

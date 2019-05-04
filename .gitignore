@@ -2,3 +2,5 @@
 *.csv
 *.csvt
 archive/mlab_census_tracts_2014_2018_0430.mbtiles
+notes/ogr_commands.md
+data/mlab_stats_by_congress_district.json
