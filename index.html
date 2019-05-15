@@ -611,8 +611,8 @@ map.on('load', function () {
 	let fragment = window.location.hash;
 	if (fragment) {
 		const check = (v, test) => test(v) ? v : undefined;
-		const datasetNames = Array.from(document.querySelector("#data option")).map(el => el.value);
-		const geoNames = Array.from(document.querySelector("#geo option")).map(el => el.value);
+		const datasetNames = Array.from(document.querySelectorAll("#data option")).map(el => el.value);
+		const geoNames = Array.from(document.querySelectorAll("#geo option")).map(el => el.value);
 		const parts = fragment.slice(1).split("/");
 		const dataset = check(parts[0], (v) => datasetNames.indexOf(v) >= 0);
 		const geo = check(parts[1], (v) => geoNames.indexOf(v) >= 0);
