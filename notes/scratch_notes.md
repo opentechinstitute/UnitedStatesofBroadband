@@ -1,12 +1,7 @@
 TODO
 
-
-3) fcc data
-    - only county & CT (or block) are doable
 4) comparison data
-    - 
 5) figure out appropriate breaks for layers
-  - see email from sascha
 6) include ross' NN layer
 8) unify filed names across tiles
   - congress -- ml_ul/dl etc
@@ -17,6 +12,9 @@ LATER
 2) fix census tracts rendering
 
 DONE
+3) fcc data
+    - only county & CT (or block) are doable, ATM
+    - Other geographies, need a more complex query
 7) include fly-to code
 9) encode the selections in the URL so that views can be shared
 
