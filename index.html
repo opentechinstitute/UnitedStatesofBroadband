@@ -95,9 +95,16 @@
 		  <option value="state_senate">State Senate</option>
 		  <option value="census_tract">Census Tract</option>
 		  <option value="zcta">Zip Code</option>
+		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
 		</select>
 
 		<br/>
+
+		State: <select id="state_select" name="state">
+		</select>
+
+		<br/>
+
 		Dataset: <select id="data" name="data">
 		  <option value="mlab" id="mlab">Measurement Lab</option>
 		  <option value="fcc" id="fcc">FCC 477</option>
@@ -108,13 +115,15 @@
 		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
 
 		Measurement: <select id="measurement" name="measurement">
-		  <option value="download_Mbps_">Download</option>
-		  <option value="upload_Mbps_">Upload</option>
+		  <option value="download_Mbps_">Download Median (Mbps)</option>
+		  <option value="upload_Mbps_">Upload Median (Mbps)</option>
 		  <option value="min_rtt_">RTT</option>
 		  <option value="dl_count_tests_">Download Tests (count)</option>
 		  <option value="ul_count_tests_">Upload Tests (count)</option>
 		  <option value="dl_count_ips_">Download IPs (count)</option>
 		  <option value="ul_count_ips_">Upload IPs (count)</option>
+		  <option value="advertised_down_">Advertised Download Median (Mbps)</option>
+		  <option value="advertised_up_">Advertised Upload Median (Mbps)</option>
 		</select>
 
 	</div>
@@ -167,6 +176,8 @@ var time_periods = [['dec_2014','Dec 2014'],
 					['jun_2018','Jun 2018'],
 					['dec_2018','Dec 2018']];
 
+var states = ["All States","Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+
 var ramps = {
 	'download_Mbps_': [0, '#fff',
 				10, '#EED322',
@@ -209,14 +220,34 @@ var ramps = {
 				1000, '#E6B71E',
 				5000, '#B86B25',
 				10000, '#8B4225',
-				25000, '#723122']
+				25000, '#723122'],
+	'advertised_down_': [0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'],
+	'advertised_up_': [0, '#fff',
+				5, '#EED322',
+				10, '#E6B71E',
+				20, '#B86B25',
+				30, '#8B4225',
+				50, '#723122']
 };
 
 function makeColorRamp(){
-		var geo_layer = document.getElementById('data').value + '_' + document.getElementById('geo').value;
+		
+		var dataset = document.getElementById('data').value;
+		var geo_layer = dataset + '_' + document.getElementById('geo').value;
 		var time_period = time_periods[document.getElementById('slider').value];
 		var measure = document.getElementById('measurement').value;
-		var field = 'ml_' + measure + time_period[0];
+		
+		if( dataset == 'fcc'){
+			var field = dataset + '_' + measure + time_period[0];
+		}
+		else{
+			var field = 'ml_' + measure + time_period[0];
+		}
 
 		var ramp =	[ 'interpolate',
 				['linear'],
@@ -250,7 +281,7 @@ function makeColorRamp(){
 		}
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','mlab_nn_state_bills']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -265,6 +296,15 @@ function makeColorRamp(){
 
 
 map.on('load', function () {
+
+	// add states to selector
+	var c = document.getElementById('state_select');
+	for (var s in states) {
+	    var option = document.createElement('option');
+	    option.value = states[s];
+	    option.innerHTML = states[s];
+	    c.appendChild(option);
+	}
 
     map.addLayer({
         "id": "mlab_county",
@@ -440,6 +480,51 @@ map.on('load', function () {
         }
     });
 
+    map.addLayer({
+        "id": "mlab_nn_state_bills",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.cjv9o72qc0emy2rk1wfh1b3mm-4fzkl'
+        },
+        //"filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "nn_state_bills",
+        "paint": {
+            "fill-color": "#60af83",
+            "fill-opacity": 0.3
+        }
+    });
+
+    map.addLayer({
+        "id": "fcc_census_tract",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.ale67zb4'
+        },
+        "filter": ["has",'fcc_advertised_down_jun_2017'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "fcc477_ct_json",
+        "paint": {
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'fcc_advertised_down_jun_2017'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
 
     // When a click event occurs on a feature in the states layer, open a popup at the
 	// location of the click, with description HTML from its properties.
@@ -488,6 +573,36 @@ map.on('load', function () {
 	// Change it back to a pointer when it leaves.
 	map.on('mouseleave', 'mlab_county', function () {
 		map.getCanvas().style.cursor = '';
+	});
+
+	// zoom to click
+	map.on('click', 'mlab_nn_state_bills', function () {
+			
+			//idea 1
+			/*var coordinates = e.features[0].geometry.coordinates;
+            console.log(coordinates);
+            var bounds;
+            if (e.features[0].geometry.type === "MultiPolygon") {
+                bounds = coordinates.reduce(function(bounds, coord) {
+                    return bounds.extend(coord[0].reduce(function(inner_bounds, inner_coord) {
+                        return inner_bounds.extend(inner_coord);
+                    }, new mapboxgl.LngLatBounds(coord[0][0], coord[0][0])));
+                }, new mapboxgl.LngLatBounds(coordinates[0][0][0], coordinates[0][0][0]));
+            } else {
+                bounds = coordinates[0].reduce(function(bounds, coord) {
+                    return bounds.extend(coord);
+                }, new mapboxgl.LngLatBounds(coordinates[0][0], coordinates[0][0]));
+            }
+            map.fitBounds(bounds, {
+                padding: 20
+            });*/
+
+            //idea 2
+           /* cities.features.forEach(function(city, index) {
+				setTimeout(function() {
+				map.jumpTo({center: city.geometry.coordinates});
+				}, 2000 * index);
+				});*/
 	});
 
 	// Run the color ramp to start

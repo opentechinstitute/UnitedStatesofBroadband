@@ -2,11 +2,15 @@
 
 import csv
 import json
+import sys
 from functools import reduce
+from os import path
 
-basename = "mlab_stats_by_congress_district"
-input_file = "{}.json".format(basename)
-output_file = "{}.csv".format(basename)
+input_file = sys.argv[1]
+(base, ext) = path.splitext(input_file)
+assert ext == '.json', "Expected json file but extension is {}".format(ext)
+
+output_file = "{}.csv".format(base)
 
 replace_keys = {
     'district_geom': 'WKT',
@@ -25,7 +29,7 @@ def rewrite_row(json_row):
     "Flattens a json row into a dict with scalar values"
     row = dict()
     for k, v in json_row.items():
-        if k in ('dl', 'ul'):
+        if k in ('dl', 'ul', 'slice'):
             for time_slice in v:
                 time_period = time_slice.get('time_period')
                 if not time_period:
