@@ -95,12 +95,11 @@
 		  <option value="state_senate">State Senate</option>
 		  <option value="census_tract">Census Tract</option>
 		  <option value="zcta">Zip Code</option>
-		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
 		</select>
 
 		<br/>
 
-		State: <select id="state_select" name="state">
+		State: <select id="state_select" name="state_select">
 		</select>
 
 		<br/>
@@ -108,6 +107,7 @@
 		Dataset: <select id="data" name="data">
 		  <option value="mlab" id="mlab">Measurement Lab</option>
 		  <option value="fcc" id="fcc">FCC 477</option>
+		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
 		</select> 
 
 		<br/>
@@ -178,6 +178,60 @@ var time_periods = [['dec_2014','Dec 2014'],
 
 var states = ["All States","Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
 
+var states_centers = [
+	["All States", [38.526600, -96.726486, 3]],
+	["Alabama", [32.806671, -86.791130, 5]],
+    ["Alaska", [61.370716, -152.404419, 3]],
+    ["Arizona", [33.729759, -111.431221, 5]],
+    ["Arkansas", [34.969704, -92.373123, 5]],
+    ["California", [36.116203, -119.681564, 5]],
+    ["Colorado", [39.059811, -105.311104, 5]],
+    ["Connecticut", [41.597782, -72.755371, 5]],
+    ["Delaware", [39.318523, -75.507141, 6]],
+    ["District of Columbia", [38.897438, -77.026817, 5]],
+    ["Florida", [27.766279, -81.686783, 5]],
+    ["Georgia", [33.040619, -83.643074, 5]],
+    ["Hawaii", [21.094318, -157.498337, 5]],
+    ["Idaho", [44.240459, -114.478828, 5]],
+    ["Illinois", [40.349457, -88.986137, 5]],
+    ["Indiana", [39.849426, -86.258278, 5]],
+    ["Iowa", [42.011539, -93.210526, 5]],
+    ["Kansas", [38.526600, -96.726486, 5]],
+    ["Kentucky", [37.668140, -84.670067, 5]],
+    ["Louisiana", [31.169546, -91.867805, 5]],
+    ["Maine", [44.693947, -69.381927, 5]],
+    ["Maryland", [39.063946, -76.802101, 5]],
+    ["Massachusetts", [42.230171, -71.530106, 5]],
+    ["Michigan", [43.326618, -84.536095, 5]],
+    ["Minnesota", [45.694454, -93.900192, 5]],
+    ["Mississippi", [32.741646, -89.678696, 5]],
+    ["Missouri", [38.456085, -92.288368, 5]],
+    ["Montana", [46.921925, -110.454353, 5]],
+    ["Nebraska", [41.125370, -98.268082, 5]],
+    ["Nevada", [38.313515, -117.055374, 5]],
+    ["New Hampshire", [43.452492, -71.563896, 5]],
+    ["New Jersey", [40.298904, -74.521011, 5]],
+    ["New Mexico", [34.840515, -106.248482, 5]],
+    ["New York", [42.165726, -74.948051, 5]],
+    ["North Carolina", [35.630066, -79.806419, 5]],
+    ["North Dakota", [47.528912, -99.784012, 5]],
+    ["Ohio", [40.388783, -82.764915, 5]],
+    ["Oklahoma", [35.565342, -96.928917, 5]],
+    ["Oregon", [44.572021, -122.070938, 5]],
+    ["Pennsylvania", [40.590752, -77.209755, 5]],
+    ["Rhode Island", [41.680893, -71.511780, 6]],
+    ["South Carolina", [33.856892, -80.945007, 5]],
+    ["South Dakota", [44.299782, -99.438828, 5]],
+    ["Tennessee", [35.747845, -86.692345, 5]],
+    ["Texas", [31.054487, -97.563461, 5]],
+    ["Utah", [40.150032, -111.862434, 5]],
+    ["Vermont", [44.045876, -72.710686, 5]],
+    ["Virginia", [37.769337, -78.169968, 5]],
+    ["Washington", [47.400902, -121.490494, 5]],
+    ["West Virginia", [38.491226, -80.954453, 5]],
+    ["Wisconsin", [44.268543, -89.616508, 5]],
+    ["Wyoming", [42.755966, -107.302490], 5]];
+
 var ramps = {
 	'download_Mbps_': [0, '#fff',
 				10, '#EED322',
@@ -232,7 +286,8 @@ var ramps = {
 				10, '#E6B71E',
 				20, '#B86B25',
 				30, '#8B4225',
-				50, '#723122']
+				50, '#723122'],
+	'state_select':['#60af83']
 };
 
 function makeColorRamp(){
@@ -241,19 +296,35 @@ function makeColorRamp(){
 		var geo_layer = dataset + '_' + document.getElementById('geo').value;
 		var time_period = time_periods[document.getElementById('slider').value];
 		var measure = document.getElementById('measurement').value;
+		var state = document.getElementById('state_select').value;
 		
 		if( dataset == 'fcc'){
 			var field = dataset + '_' + measure + time_period[0];
-		}
-		else{
-			var field = 'ml_' + measure + time_period[0];
-		}
 
-		var ramp =	[ 'interpolate',
+			var ramp =	[ 'interpolate',
 				['linear'],
 				['get', field],
 			];
-		ramp = ramp.concat(ramps[measure]);
+
+			ramp = ramp.concat(ramps[measure]);
+		}
+		if( dataset == 'mlab' ){
+			var field = 'ml_' + measure + time_period[0];
+
+			var ramp =	[ 'interpolate',
+				['linear'],
+				['get', field],
+			];
+
+			ramp = ramp.concat(ramps[measure]);
+		}
+		else {
+			var field = dataset;
+			var measure = 'state_select';
+			var ramp = ramps[measure];
+		}
+
+		console.log(ramp);
 
 		//update map colors
 		map.setPaintProperty(geo_layer,'fill-color',ramp);
@@ -281,7 +352,7 @@ function makeColorRamp(){
 		}
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','mlab_nn_state_bills']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -298,13 +369,13 @@ function makeColorRamp(){
 map.on('load', function () {
 
 	// add states to selector
-	var c = document.getElementById('state_select');
-	for (var s in states) {
-	    var option = document.createElement('option');
-	    option.value = states[s];
-	    option.innerHTML = states[s];
-	    c.appendChild(option);
-	}
+	 var c = document.getElementById('state_select');
+	 for (var s in states) {
+	     var option = document.createElement('option');
+	     option.value = states[s];
+	     option.innerHTML = states[s];
+	     c.appendChild(option);
+	 }
 
     map.addLayer({
         "id": "mlab_county",
@@ -525,6 +596,50 @@ map.on('load', function () {
         }
     });
 
+    map.addLayer({
+        "id": "fcc_county",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.2lyzr0wd'
+        },
+        "filter": ["has",'fcc_advertised_down_jun_2017'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "fcc_477_county_2014_2017_0515",
+        "paint": {
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'fcc_advertised_down_jun_2017'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "us_states",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.cjvopv39u05jt2wmna9mg5wz4-7j8om'
+        },
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "us_states",
+        "paint": {
+            "fill-color": "#60af83",
+            "fill-opacity": 0.3
+        }
+    });
+
 
     // When a click event occurs on a feature in the states layer, open a popup at the
 	// location of the click, with description HTML from its properties.
@@ -573,36 +688,6 @@ map.on('load', function () {
 	// Change it back to a pointer when it leaves.
 	map.on('mouseleave', 'mlab_county', function () {
 		map.getCanvas().style.cursor = '';
-	});
-
-	// zoom to click
-	map.on('click', 'mlab_nn_state_bills', function () {
-			
-			//idea 1
-			/*var coordinates = e.features[0].geometry.coordinates;
-            console.log(coordinates);
-            var bounds;
-            if (e.features[0].geometry.type === "MultiPolygon") {
-                bounds = coordinates.reduce(function(bounds, coord) {
-                    return bounds.extend(coord[0].reduce(function(inner_bounds, inner_coord) {
-                        return inner_bounds.extend(inner_coord);
-                    }, new mapboxgl.LngLatBounds(coord[0][0], coord[0][0])));
-                }, new mapboxgl.LngLatBounds(coordinates[0][0][0], coordinates[0][0][0]));
-            } else {
-                bounds = coordinates[0].reduce(function(bounds, coord) {
-                    return bounds.extend(coord);
-                }, new mapboxgl.LngLatBounds(coordinates[0][0], coordinates[0][0]));
-            }
-            map.fitBounds(bounds, {
-                padding: 20
-            });*/
-
-            //idea 2
-           /* cities.features.forEach(function(city, index) {
-				setTimeout(function() {
-				map.jumpTo({center: city.geometry.coordinates});
-				}, 2000 * index);
-				});*/
 	});
 
 
@@ -660,6 +745,33 @@ map.on('load', function () {
 	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
 	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
 	document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+	
+	//flyto
+	document.getElementById('state_select').addEventListener('input', function(e) { 
+	// Fly to a random location by offsetting the point -74.50, 40
+	// by up to 5 degrees.
+		
+		let active_state = document.getElementById('state_select').value;
+
+	    for (var i = 0; i < states_centers.length; i++) {
+	        // This if statement depends on the format of your array
+	        if (states_centers[i][0] == active_state) {
+	            //console.log(states_centers[i][1]);
+	            fly_to_loc = states_centers[i][1];
+	        }
+	    }
+
+
+		map.flyTo({
+	        center: [
+	            fly_to_loc[1],
+	            fly_to_loc[0]
+	        ],
+	        zoom: fly_to_loc[2],
+	        speed: .5
+    	});
+
+	 });
 
 	map.on('moveend', updateFragment);
 });

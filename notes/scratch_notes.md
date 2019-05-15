@@ -1,9 +1,10 @@
 TODO
 
-1) fix zcta rendering
-2) fix census tracts rendering
+
 3) fcc data
+    - only county & CT (or block) are doable
 4) comparison data
+    - 
 5) figure out appropriate breaks for layers
   - see email from sascha
 6) include ross' NN layer
@@ -11,6 +12,10 @@ TODO
 8) unify filed names across tiles
   - congress -- ml_ul/dl etc
   - all -- Name == whatever is the right name at the geo
+
+LATER
+1) fix zcta rendering
+2) fix census tracts rendering
 
 DONE
 9) encode the selections in the URL so that views can be shared

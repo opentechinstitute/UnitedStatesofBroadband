@@ -22,6 +22,7 @@ replace_keys = {
     'ul_tx_Mbps': 'upload_Mbps',
     'dl_min_rtt': 'min_rtt',
     'legal_area_name': 'name',
+    'county_name': 'name',
     'geo_id': 'GEOID'
 }
 
