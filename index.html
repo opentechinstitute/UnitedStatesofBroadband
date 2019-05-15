@@ -608,12 +608,60 @@ map.on('load', function () {
 	// Run the color ramp to start
 	makeColorRamp();
 
-	// change things based on selection in the legend
-	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); });
-	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); });
-	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); });
-	document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); });
 
+	// Read settings from URL, if any.
+	// :dataset/:geo/:timeperiod/:measure/:x/:y/:z
+	let fragment = window.location.hash;
+	if (fragment) {
+		const check = (v, test) => test(v) ? v : undefined;
+		const datasetNames = Array.from(document.querySelector("#data option")).map(el => el.value);
+		const geoNames = Array.from(document.querySelector("#geo option")).map(el => el.value);
+		const parts = fragment.slice(1).split("/");
+		const dataset = check(parts[0], (v) => datasetNames.indexOf(v) >= 0);
+		const geo = check(parts[1], (v) => geoNames.indexOf(v) >= 0);
+		const timeperiod = check(parts[2], (v) => time_periods.findIndex((x) => x[0] == v) >= 0);
+		const measure = check(parts[3], (v) => v in ramps);
+		const x = check(Number(parts[4]), (v) => !Number.isNaN(v));
+		const y = check(Number(parts[5]), (v) => !Number.isNaN(v));
+		const z = check(Number(parts[6]), (v) => !Number.isNaN(v));
+
+		if (dataset) {
+			document.querySelector(`#data [value='${dataset}']`).selected = true;
+		}
+		if (geo) {
+			document.querySelector(`#geo [value='${geo}']`).selected = true;
+		}
+		if (timeperiod !== undefined) {
+			document.getElementById('slider').value = time_periods.findIndex((x) => x[0] == timeperiod);
+		}
+		if (measure) {
+			document.querySelector(`#measurement [value='${measure}']`).selected = true;
+		}
+		if ([x,y,z].every(n => n !== undefined)) {
+			map.jumpTo({ center: [x, y], zoom: z });
+		}
+	}
+
+  // Encode the map state into the fragment for linkability.  Keep this in sync with the block above.
+  function updateFragment() {
+		const dataset = document.getElementById("data").value;
+		const geo = document.getElementById("geo").value;
+		const timeperiod = time_periods[document.getElementById("slider").value][0];
+		const measure = document.getElementById("measurement").value;
+		const { lng: x, lat: y } = map.getCenter();
+		const z = map.getZoom();
+		const url = new URL(window.location);
+		url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x}/${y}/${z}`;
+		window.history.replaceState(undefined, 'USBB', url.toString());
+	}
+	
+	// change things based on selection in the legend
+	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+	document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+
+	map.on('moveend', updateFragment);
 });
 </script>
 
