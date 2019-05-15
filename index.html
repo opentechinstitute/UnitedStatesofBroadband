@@ -605,9 +605,6 @@ map.on('load', function () {
 				});*/
 	});
 
-	// Run the color ramp to start
-	makeColorRamp();
-
 
 	// Read settings from URL, if any.
 	// :dataset/:geo/:timeperiod/:measure/:x/:y/:z
@@ -654,6 +651,9 @@ map.on('load', function () {
 		url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x}/${y}/${z}`;
 		window.history.replaceState(undefined, 'USBB', url.toString());
 	}
+
+	// Run the color ramp to start
+	makeColorRamp();
 	
 	// change things based on selection in the legend
 	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });

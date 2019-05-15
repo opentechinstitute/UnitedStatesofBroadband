@@ -3,10 +3,17 @@ TODO
 1) fix zcta rendering
 2) fix census tracts rendering
 3) fcc data
-4) figure out appropriate breaks for layers
-5) include ross' NN layer
-6) include ross' fly-to code
-7) NTH: encode the selections in the URL so that views can be shared
+4) comparison data
+5) figure out appropriate breaks for layers
+  - see email from sascha
+6) include ross' NN layer
+7) include ross' fly-to code
+8) unify filed names across tiles
+  - congress -- ml_ul/dl etc
+  - all -- Name == whatever is the right name at the geo
+
+DONE
+9) encode the selections in the URL so that views can be shared
 
 
 Notes for USBB Process
