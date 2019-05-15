@@ -8,7 +8,6 @@ TODO
 5) figure out appropriate breaks for layers
   - see email from sascha
 6) include ross' NN layer
-7) include ross' fly-to code
 8) unify filed names across tiles
   - congress -- ml_ul/dl etc
   - all -- Name == whatever is the right name at the geo
@@ -18,6 +17,7 @@ LATER
 2) fix census tracts rendering
 
 DONE
+7) include fly-to code
 9) encode the selections in the URL so that views can be shared
 
 

@@ -107,7 +107,7 @@
 		Dataset: <select id="data" name="data">
 		  <option value="mlab" id="mlab">Measurement Lab</option>
 		  <option value="fcc" id="fcc">FCC 477</option>
-		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
+		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option> -->
 		</select> 
 
 		<br/>
@@ -115,6 +115,9 @@
 		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
 
 		Measurement: <select id="measurement" name="measurement">
+		  <!-- <option value="dl_bb_cutoffs">Download Broadband Cutoffs</option>
+		  <option value="ul_bb_cutoffs">Upload Broadband Cutoffs</option> -->
+		  <optgroup label="M-Lab">
 		  <option value="download_Mbps_">Download Median (Mbps)</option>
 		  <option value="upload_Mbps_">Upload Median (Mbps)</option>
 		  <option value="min_rtt_">RTT</option>
@@ -122,8 +125,11 @@
 		  <option value="ul_count_tests_">Upload Tests (count)</option>
 		  <option value="dl_count_ips_">Download IPs (count)</option>
 		  <option value="ul_count_ips_">Upload IPs (count)</option>
+		  </optgroup>
+		  <optgroup label="FCC Data">
 		  <option value="advertised_down_">Advertised Download Median (Mbps)</option>
 		  <option value="advertised_up_">Advertised Upload Median (Mbps)</option>
+		  </optgroup>
 		</select>
 
 	</div>
@@ -143,17 +149,6 @@
 		    <div class='label'>0</div>
 		  </div>
 		</div>
-		<!-- <div class='session'>
-		  <h3>Day of the week</h3>
-		  <div class='row' id='filters'>
-		    <input id='all' type='radio' name='toggle' value='all' checked='checked'>
-		    <label for='all'>All</label>
-		    <input id='weekday' type='radio' name='toggle' value='weekday'>
-		    <label for='weekday'>Weekday</label>
-		    <input id='weekend' type='radio' name='toggle' value='weekend'>
-		    <label for='weekend'>Weekend</label>
-		  </div>
-		</div> -->
 	</div>
 </div>
 
@@ -287,7 +282,11 @@ var ramps = {
 				20, '#B86B25',
 				30, '#8B4225',
 				50, '#723122'],
-	'state_select':['#60af83']
+	'state_select':['#60af83'],
+	'dl_bb_cutoffs': [0, '#fff',
+				10, '#EED322'],
+	'ul_bb_cutoffs': [0, '#fff',
+				1, '#EED322'],
 };
 
 function makeColorRamp(){
@@ -301,30 +300,21 @@ function makeColorRamp(){
 		if( dataset == 'fcc'){
 			var field = dataset + '_' + measure + time_period[0];
 
-			var ramp =	[ 'interpolate',
-				['linear'],
-				['get', field],
-			];
-
-			ramp = ramp.concat(ramps[measure]);
 		}
 		if( dataset == 'mlab' ){
 			var field = 'ml_' + measure + time_period[0];
 
-			var ramp =	[ 'interpolate',
-				['linear'],
-				['get', field],
-			];
-
-			ramp = ramp.concat(ramps[measure]);
 		}
-		else {
-			var field = dataset;
-			var measure = 'state_select';
-			var ramp = ramps[measure];
+		else{
+			dataset == 'nn';
 		}
 
-		console.log(ramp);
+		var ramp =	[ 'interpolate',
+			['linear'],
+			['get', field],
+		];
+
+		ramp = ramp.concat(ramps[measure]);
 
 		//update map colors
 		map.setPaintProperty(geo_layer,'fill-color',ramp);
@@ -582,6 +572,7 @@ map.on('load', function () {
 			},
         "source-layer": "fcc477_ct_json",
         "paint": {
+            "fill-opacity": 0.7,
             "fill-color": [
 				'interpolate',
 				['linear'],
@@ -609,6 +600,7 @@ map.on('load', function () {
 			},
         "source-layer": "fcc_477_county_2014_2017_0515",
         "paint": {
+            "fill-opacity": 0.7,
             "fill-color": [
 				'interpolate',
 				['linear'],
