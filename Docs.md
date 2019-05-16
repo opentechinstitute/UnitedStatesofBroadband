@@ -197,3 +197,30 @@ $ ogr2ogr -f GeoJSON /dev/stdout \
     -l mlab_county_dec2014_dec2018 /dev/stdin -zg
 ```
 
+### Join csvs using xsv
+```sh
+$ xsv join --help
+...
+Usage:
+    xsv join [options] <columns1> <input1> <columns2> <input2>
+...
+```
+
+```sh
+$ xsv join --full \
+  GEOID fcc_477_county_2014_2017_0515.csv \
+  GEOID mlab_county_dec2014_dec2018_429.csv | \
+  xsv select '!NAME,GEOID,WKT' > fcc_mlab_county_dec2014_dec2018_429.csv
+```
+
+```sh
+$ (
+  echo 'GEOID'; \
+  xsv select 'GEOID' mlab_census_tracts_2014_2018_0430.csv | \
+  tail -n +2 | \
+  xargs printf '%011d\n' \
+  ) | \
+  xsv cat columns - <(xsv select '!GEOID' mlab_census_tracts_2014_2018_0430.csv) > ~/mlab_adjusted_census_tracts.csv
+$ xsv join --full GEOID fcc477_ct_json.csv GEOID \
+  ~/mlab_adjusted_census_tracts.csv | xsv select '!GEOID,WKT' > fcc_mlab_census_tract.csv
+```
