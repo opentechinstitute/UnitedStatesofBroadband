@@ -2,6 +2,7 @@ TODO
 
 4) comparison data
 5) figure out appropriate breaks for layers
+5b) adapt legend based on layer
 6) include ross' NN layer
 8) unify filed names across tiles
   - congress -- ml_ul/dl etc
