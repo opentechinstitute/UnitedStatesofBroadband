@@ -93,8 +93,8 @@
 		  <option value="congress">Congressional Districts</option>
 		  <option value="state_house">State House</option>
 		  <option value="state_senate">State Senate</option>
-		  <option value="census_tract">Census Tract</option>
-		  <option value="zcta">Zip Code</option>
+		  <!-- <option value="census_tract">Census Tract</option>
+		  <option value="zcta">Zip Code</option> -->
 		</select>
 
 		<br/>
@@ -107,8 +107,8 @@
 		Dataset: <select id="data" name="data">
 		  <option value="mlab" id="mlab">Measurement Lab</option>
 		  <option value="fcc" id="fcc">FCC 477</option>
-		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option> -->
-		</select> 
+		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option>  -->
+		</select>
 
 		<br/>
 		Time Period: <label id='time_period'></label>
@@ -117,7 +117,7 @@
 		Measurement: <select id="measurement" name="measurement">
 		  <!-- <option value="dl_bb_cutoffs">Download Broadband Cutoffs</option>
 		  <option value="ul_bb_cutoffs">Upload Broadband Cutoffs</option> -->
-		  <optgroup label="M-Lab">
+		  <optgroup label="M-Lab" id="mlab">
 		  <option value="download_Mbps_">Download Median (Mbps)</option>
 		  <option value="upload_Mbps_">Upload Median (Mbps)</option>
 		  <option value="min_rtt_">RTT</option>
@@ -126,7 +126,7 @@
 		  <option value="dl_count_ips_">Download IPs (count)</option>
 		  <option value="ul_count_ips_">Upload IPs (count)</option>
 		  </optgroup>
-		  <optgroup label="FCC Data">
+		  <optgroup label="FCC Data" id="fcc">
 		  <option value="advertised_down_">Advertised Download Median (Mbps)</option>
 		  <option value="advertised_up_">Advertised Upload Median (Mbps)</option>
 		  </optgroup>
@@ -291,7 +291,8 @@ var ramps = {
 
 function makeColorRamp(){
 		
-		var dataset = document.getElementById('data').value;
+		var measureGroup = document.getElementById('measurement');
+		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
 		var geo_layer = dataset + '_' + document.getElementById('geo').value;
 		var time_period = time_periods[document.getElementById('slider').value];
 		var measure = document.getElementById('measurement').value;
@@ -401,9 +402,9 @@ map.on('load', function () {
         "type": "fill",
         "source": {
             type: 'vector',
-            url: 'mapbox://newamerica.2lv667iu'
+            url: 'mapbox://newamerica.btyk5r79'
         },
-        "source-layer": "mlab_zcta_2014_2018_0430",
+        "source-layer": "mlab_zcta",
         "filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'
@@ -649,25 +650,25 @@ map.on('load', function () {
 				'<h2>' + f[0].properties['county_name'] +'</h2>' +
 				'<em>Source:'+ document.getElementById('data').value + '</em>'+
 				'<h3>Download Speeds:</h3>'+
-				'<strong>Dec 2014: </strong> ' + f[0].properties['ml_download_Mbps_dec_2014'] + ' Mbps <br/>' +
-				'<strong>Jun 2015: </strong> ' + f[0].properties['ml_download_Mbps_jun_2015'] + ' Mbps <br/>' +
-				'<strong>Dec 2015: </strong> ' + f[0].properties['ml_download_Mbps_dec_2015'] + ' Mbps <br/>' +
-				'<strong>Jun 2016: </strong> ' + f[0].properties['ml_download_Mbps_jun_2016'] + ' Mbps <br/>' +
-				'<strong>Dec 2016: </strong> ' + f[0].properties['ml_download_Mbps_dec_2016'] + ' Mbps <br/>' +
-				'<strong>Jun 2017: </strong> ' + f[0].properties['ml_download_Mbps_jun_2017'] + ' Mbps <br/>' +
-				'<strong>Dec 2017: </strong> ' + f[0].properties['ml_download_Mbps_dec_2017'] + ' Mbps <br/>' +
-				'<strong>Jun 2018: </strong> ' + f[0].properties['ml_download_Mbps_jun_2018'] + ' Mbps <br/>' +
-				'<strong>Dec 2018: </strong> ' + f[0].properties['ml_download_Mbps_dec_2018'] + ' Mbps <br/>' +
+				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2016: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2016']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2016: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2016']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2017: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2017']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>' +
 				'<h3>Upload Speeds:</h3>'+
-				'<strong>Dec 2014: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2014'] + ' Mbps <br/>' +
-				'<strong>Jun 2015: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2015'] + ' Mbps <br/>' +
-				'<strong>Dec 2015: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2015'] + ' Mbps <br/>' +
-				'<strong>Jun 2016: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2016'] + ' Mbps <br/>' +
-				'<strong>Dec 2016: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2016'] + ' Mbps <br/>' +
-				'<strong>Jun 2017: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2017'] + ' Mbps <br/>' +
-				'<strong>Dec 2017: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2017'] + ' Mbps <br/>' +
-				'<strong>Jun 2018: </strong> ' + f[0].properties['ml_upload_Mbps_jun_2018'] + ' Mbps <br/>' +
-				'<strong>Dec 2018: </strong> ' + f[0].properties['ml_upload_Mbps_dec_2018'] + ' Mbps <br/>'
+				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2016: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2016']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2016: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2016']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2017']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
+				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>'
 				)
 			.addTo(map);
 	});
@@ -688,7 +689,14 @@ map.on('load', function () {
 	let fragment = window.location.hash;
 	if (fragment) {
 		const check = (v, test) => test(v) ? v : undefined;
+
+		const measureGroup = document.getElementById('measurement');
+		const dataset1 = measureGroup.options;
+		console.log(dataset1);
+
 		const datasetNames = Array.from(document.querySelectorAll("#data option")).map(el => el.value);
+		console.log(datasetNames);
+
 		const geoNames = Array.from(document.querySelectorAll("#geo option")).map(el => el.value);
 		const parts = fragment.slice(1).split("/");
 		const dataset = check(parts[0], (v) => datasetNames.indexOf(v) >= 0);
