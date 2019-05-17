@@ -404,7 +404,7 @@ map.on('load', function () {
             type: 'vector',
             url: 'mapbox://newamerica.btyk5r79'
         },
-        "source-layer": "mlab_zcta",
+        "source-layer": "mlab_zcta_2014_2018_0430",
         "filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'
@@ -648,8 +648,9 @@ map.on('load', function () {
 		popup.setLngLat(e.lngLat)
 			.setHTML(
 				'<h2>' + f[0].properties['county_name'] +'</h2>' +
-				'<em>Source:'+ document.getElementById('data').value + '</em>'+
-				'<h3>Download Speeds:</h3>'+
+				'<em>Source:'+ document.getElementById('data').value + '</em>'+ 					  
+				'<table style="width:100%"><tr><th>Download Speeds</th><th>Upload Speed</th></tr>' +
+					'<tr><td>'+
 				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
@@ -659,7 +660,9 @@ map.on('load', function () {
 				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>' +
-				'<h3>Upload Speeds:</h3>'+
+					
+					'</td><td>' +
+
 				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
@@ -668,7 +671,9 @@ map.on('load', function () {
 				'<strong>Jun 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2017']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
 				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>'
+				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>' +
+
+				'</td></tr></tr></table>'
 				)
 			.addTo(map);
 	});
