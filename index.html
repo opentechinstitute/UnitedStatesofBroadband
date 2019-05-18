@@ -78,7 +78,22 @@
 		  padding: 10px 20px;
 		  background-color: white;
 		}
-
+		.report {
+			display: grid;
+			grid-template-columns: repeat(4, auto);
+			grid-column-gap: 0.5em;
+		}
+		.report-header {
+			grid-column: span 2;
+			font-weight: bold;
+			border-bottom: 1px solid black;
+		}
+		.report-value {
+			text-align: end;
+		}
+		.report-key {
+			text-align: end;
+		}
     </style>
 </head>
 <body>
@@ -93,8 +108,8 @@
 		  <option value="congress">Congressional Districts</option>
 		  <option value="state_house">State House</option>
 		  <option value="state_senate">State Senate</option>
-		  <!-- <option value="census_tract">Census Tract</option>
-		  <option value="zcta">Zip Code</option> -->
+		  <option value="census_tract">Census Tract</option>
+		  <option value="zcta">Zip Code</option>
 		</select>
 
 		<br/>
@@ -104,11 +119,11 @@
 
 		<br/>
 
-		Dataset: <select id="data" name="data">
+		<!-- Dataset: <select id="data" name="data">
 		  <option value="mlab" id="mlab">Measurement Lab</option>
 		  <option value="fcc" id="fcc">FCC 477</option>
-		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option>  -->
-		</select>
+		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option>
+		</select> -->
 
 		<br/>
 		Time Period: <label id='time_period'></label>
@@ -129,6 +144,10 @@
 		  <optgroup label="FCC Data" id="fcc">
 		  <option value="advertised_down_">Advertised Download Median (Mbps)</option>
 		  <option value="advertised_up_">Advertised Upload Median (Mbps)</option>
+		  </optgroup>
+		  <optgroup label="Comparison of M-Lab & FCC" id="difference">
+		  	<option value="compare_down_">Difference (FCC - MLab) Download Medians</option>
+		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
 		  </optgroup>
 		</select>
 
@@ -344,7 +363,7 @@ function makeColorRamp(){
 		}
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states','fcc_mlab_county','fcc_mlab_census_tract']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -403,10 +422,10 @@ map.on('load', function () {
         "type": "fill",
         "source": {
             type: 'vector',
-            url: 'mapbox://newamerica.btyk5r79'
+            url: 'mapbox://newamerica.mlab_zcta'
         },
-        "source-layer": "mlab_zcta_2014_2018_0430",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
+        "source-layer": "mlab_zcta",
+        //"filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'
 			},
@@ -432,9 +451,9 @@ map.on('load', function () {
         "type": "fill",
         "source": {
             type: 'vector',
-            url: 'mapbox://newamerica.5l0a8uxx'
+            url: 'mapbox://newamerica.mlab_census_tracts'
         },
-        "source-layer": "mlab_census_tracts_2014_2018_0430",
+        "source-layer": "mlab_census_tract",
         "filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'
@@ -618,6 +637,63 @@ map.on('load', function () {
     });
 
     map.addLayer({
+        "id": "fcc_mlab_census_tract",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.mlab_fcc_census_tracts'
+        },
+        "filter": ["has",'fcc_advertised_down_jun_2017'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "fcc_mlab_census_tract",
+        "paint": {
+            "fill-opacity": 0.7,
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'fcc_advertised_down_jun_2017'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+
+    map.addLayer({
+        "id": "fcc_mlab_county",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.mlab_fcc_county'
+        },
+        "filter": ["has",'fcc_advertised_down_jun_2017'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "source-layer": "fcc_mlab_county",
+        "paint": {
+            "fill-opacity": 0.7,
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'fcc_advertised_down_jun_2017'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
         "id": "us_states",
         "type": "fill",
         "source": {
@@ -646,35 +722,39 @@ map.on('load', function () {
 		// 	showPopup(f[0]);
 		// }
 			
+		function rate(key) {
+			if (key in f[0].properties) {
+				return `${f[0].properties[key].toFixed(2)} Mbps`;
+			} else {
+				return '[No results]';
+			}
+		}
+		const rows = [
+			["Dec 2014", "ml_download_Mbps_dec_2014", "ml_upload_Mbps_dec_2014"],
+			["Jun 2015", "ml_download_Mbps_jun_2015", "ml_upload_Mbps_jun_2015"],
+			["Dec 2015", "ml_download_Mbps_dec_2015", "ml_upload_Mbps_dec_2015"],
+			["Jun 2016", "ml_download_Mbps_jun_2016", "ml_upload_Mbps_jun_2016"],
+			["Dec 2016", "ml_download_Mbps_dec_2016", "ml_upload_Mbps_dec_2016"],
+			["Jun 2017", "ml_download_Mbps_jun_2017", "ml_upload_Mbps_jun_2017"],
+			["Dec 2017", "ml_download_Mbps_dec_2017", "ml_upload_Mbps_dec_2017"],
+			["Jun 2018", "ml_download_Mbps_jun_2018", "ml_upload_Mbps_jun_2018"],
+			["Dec 2018", "ml_download_Mbps_dec_2018", "ml_upload_Mbps_dec_2018"],
+		];
+		const formatRow = ([time, dl_key, ul_key]) => 
+			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
+			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
+		
+		var measureGroup = document.getElementById('measurement');
+		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
+
 		popup.setLngLat(e.lngLat)
 			.setHTML(
 				'<h2>' + f[0].properties['county_name'] +'</h2>' +
-				'<em>Source:'+ document.getElementById('data').value + '</em>'+ 					  
-				'<table style="width:100%"><tr><th><h3>Download Speeds</h3></th><th><h3>Upload Speeds</h3></th></tr>' +
-					'<tr><td>'+
-				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2016: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2016']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2016: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2016']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2017: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2017']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_download_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_download_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>' +
-					
-					'</td><td>' +
-
-				'<strong>Dec 2014: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2014']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2015']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2015: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2015']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2016: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2016']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2016: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2016']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2017']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2017: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2017']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Jun 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_jun_2018']).toFixed(2) + ' Mbps <br/>' +
-				'<strong>Dec 2018: </strong> ' + (f[0].properties['ml_upload_Mbps_dec_2018']).toFixed(2) + ' Mbps <br/>' +
-
-				'</td></tr></tr></table>'
+				'<em>Source:'+ dataset + '</em>'+
+				'<div class="report">' +
+				'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+				rows.map(formatRow).join('\n') +
+				'</div>'
 				)
 			.addTo(map);
 	});
@@ -732,14 +812,15 @@ map.on('load', function () {
 
   // Encode the map state into the fragment for linkability.  Keep this in sync with the block above.
   function updateFragment() {
-		const dataset = document.getElementById("data").value;
+		var measureGroup = document.getElementById('measurement');
+		const dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
 		const geo = document.getElementById("geo").value;
 		const timeperiod = time_periods[document.getElementById("slider").value][0];
 		const measure = document.getElementById("measurement").value;
 		const { lng: x, lat: y } = map.getCenter();
 		const z = map.getZoom();
 		const url = new URL(window.location);
-		url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x}/${y}/${z}`;
+		url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x.toFixed(2)}/${y.toFixed(2)}/${z.toFixed(2)}`;
 		window.history.replaceState(undefined, 'USBB', url.toString());
 	}
 
@@ -750,7 +831,7 @@ map.on('load', function () {
 	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
 	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
 	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-	document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
+	//document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
 	
 	//flyto
 	document.getElementById('state_select').addEventListener('input', function(e) { 
