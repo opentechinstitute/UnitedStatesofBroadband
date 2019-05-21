@@ -13,20 +13,22 @@
 		.map-overlay {
 		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 		position: absolute;
-		width: 25%;
 		top: 0;
 		left: 0;
 		padding: 10px;
 		}
 		 
-		.map-overlay .map-overlay-inner {
+		.map-overlay .map-overlay-inner, .map-overlay .citation {
 		background-color: #fff;
 		box-shadow:0 1px 2px rgba(0, 0, 0, 0.20);
 		border-radius: 3px;
 		padding: 10px;
 		margin-bottom: 10px;
 		}
-		 
+
+		.map-overlay .map-overlay-inner input {
+			display: block;
+		} 
 		.map-overlay h2 {
 		line-height: 24px;
 		display: block;
@@ -41,11 +43,19 @@
 		 
 		.map-overlay input {
 		background-color: transparent;
-		display: inline-block;
-		width: 100%;
+		display: block;
+		width: auto;
 		position: relative;
 		margin: 0;
 		cursor: ew-resize;
+		}
+
+		.map-overlay input#slider {
+			width: 100%;
+		}
+
+		.map-overlay label {
+			display: block;
 		}
 
 		input[type=radio] {
@@ -66,9 +76,14 @@
 		  margin-bottom: 5px;
 		}
 
+		#legendlabel {
+			display: flex;
+			/* flex-direction: rows; */
+		}
+
 		.label {
-		  width: 15%;
 		  display: inline-block;
+		  flex: 1;
 		  text-align: center;
 		}
 		#console {
@@ -94,6 +109,12 @@
 		.report-key {
 			text-align: end;
 		}
+
+		.citation{
+			max-width: 20em;
+			max-height: 15em;
+			overflow: scroll;
+		}
     </style>
 </head>
 <body>
@@ -103,33 +124,8 @@
 <div class='map-overlay top'>
 	<div class='map-overlay-inner'>
 		<h2>United States of Broadband</h2>
-		Area: <select id="geo" name="geo">
-		  <option value="county">County</option>
-		  <option value="congress">Congressional Districts</option>
-		  <option value="state_house">State House</option>
-		  <option value="state_senate">State Senate</option>
-		  <option value="census_tract">Census Tract</option>
-		  <option value="zcta">Zip Code</option>
-		</select>
-
-		<br/>
-
-		State: <select id="state_select" name="state_select">
-		</select>
-
-		<br/>
-
-		<!-- Dataset: <select id="data" name="data">
-		  <option value="mlab" id="mlab">Measurement Lab</option>
-		  <option value="fcc" id="fcc">FCC 477</option>
-		  <!-- <option value="nn_state_bills">Net Neutrality Bills by State</option>
-		</select> -->
-
-		<br/>
-		Time Period: <label id='time_period'></label>
-		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
-
-		Measurement: <select id="measurement" name="measurement">
+		<label for="measurement">Data</label>
+		<select id="measurement" name="measurement">
 		  <!-- <option value="dl_bb_cutoffs">Download Broadband Cutoffs</option>
 		  <option value="ul_bb_cutoffs">Upload Broadband Cutoffs</option> -->
 		  <optgroup label="M-Lab" id="mlab">
@@ -150,6 +146,31 @@
 		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
 		  </optgroup>
 		</select>
+		<label for="geo">Area</label>
+		<select id="geo" name="geo">
+		  <option value="county">County</option>
+		  <option value="congress">Congressional Districts</option>
+		  <option value="state_house">State House</option>
+		  <option value="state_senate">State Senate</option>
+		  <option value="census_tract">Census Tract</option>
+		  <option value="zcta">Zip Code</option>
+		</select>
+		<label for="slider">Time Period:</label>
+		<label id='time_period'></label>
+		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
+		<label for="state_select">Zoom to State</label>
+		<select id="state_select" name="state_select">
+		</select>
+
+		<br/>
+
+		<!-- Dataset: <select id="data" name="data">
+		  <option value="mlab" id="mlab">Measurement Lab</option>
+		  <option value="fcc" id="fcc">FCC 477</option>
+		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
+		</select> -->
+
+		
 
 	</div>
 	
@@ -168,6 +189,11 @@
 		    <div class='label'>0</div>
 		  </div>
 		</div>
+	</div>
+	<div class='citation'>
+			<h3>Sources & Data Notes:</h3>
+			<strong><a href="https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477">FCC 477</a></strong> data represents the advertized speeds as reported by the ISPs for a given census tract, if the ISP could service 1 household in that census tract. To provide a unified value for the census tract, we have taken all of the advertized speeds available, and shown the median value based on the speeds reported from the ISPs. <br /><br />
+			<strong><a href="https://www.measurementlab.net/tests/ndt/">M-Lab NDT</a></strong> data are Network Diagnostic Tool (NDT) measurements gathered from internet users running NDT against M-Lab servers. The data are aggregated into the reporting time periods for the FCC 477 data.
 	</div>
 </div>
 
@@ -191,6 +217,8 @@ var time_periods = [['dec_2014','Dec 2014'],
 					['dec_2018','Dec 2018']];
 
 var states = ["All States","Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+
+var popupTemplate;
 
 var states_centers = [
 	["All States", [38.526600, -96.726486, 3]],
@@ -307,32 +335,189 @@ var ramps = {
 				10, '#EED322'],
 	'ul_bb_cutoffs': [0, '#fff',
 				1, '#EED322'],
+	'compare_up_': [-Infinity, '#8c510a',
+				-25, '#8c510a',
+				-15, '#bf812d',
+				-10, '#dfc27d',
+				-5, '#f6e8c3',
+				-1, '#f5f5f5',
+				1, '#c7eae5',
+				5, '#80cdc1',
+				10, '#35978f',
+				15, '#01665e',
+				25, '#8B4225'],
+	'compare_down_': [-Infinity, '#8c510a',
+				-25, '#8c510a',
+				-15, '#bf812d',
+				-10, '#dfc27d',
+				-5, '#f6e8c3',
+				-1, '#f5f5f5',
+				1, '#c7eae5',
+				5, '#80cdc1',
+				10, '#35978f',
+				15, '#01665e',
+				25, '#8B4225']
 };
+
+	function mlabPopupTemplate(props) {
+		function rate(key) {
+			if (key in props) {
+				return `${props[key].toFixed(2)} Mbps`;
+			} else {
+				return '[No results]';
+			}
+		}
+		const rows = [
+			["Dec 2014", "ml_download_Mbps_dec_2014", "ml_upload_Mbps_dec_2014"],
+			["Jun 2015", "ml_download_Mbps_jun_2015", "ml_upload_Mbps_jun_2015"],
+			["Dec 2015", "ml_download_Mbps_dec_2015", "ml_upload_Mbps_dec_2015"],
+			["Jun 2016", "ml_download_Mbps_jun_2016", "ml_upload_Mbps_jun_2016"],
+			["Dec 2016", "ml_download_Mbps_dec_2016", "ml_upload_Mbps_dec_2016"],
+			["Jun 2017", "ml_download_Mbps_jun_2017", "ml_upload_Mbps_jun_2017"],
+			["Dec 2017", "ml_download_Mbps_dec_2017", "ml_upload_Mbps_dec_2017"],
+			["Jun 2018", "ml_download_Mbps_jun_2018", "ml_upload_Mbps_jun_2018"],
+			["Dec 2018", "ml_download_Mbps_dec_2018", "ml_upload_Mbps_dec_2018"],
+		];
+		const formatRow = ([time, dl_key, ul_key]) =>
+			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
+			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
+
+		var measureGroup = document.getElementById('measurement');
+		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
+
+		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name']) + '</h2>' +
+			'<em>Source:' + dataset + '</em>' +
+			'<div class="report">' +
+			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			rows.map(formatRow).join('\n') +
+			'</div>'
+		);
+	}
+
+	function fccPopupTemplate(props) {
+		//console.log(props);
+
+		function rate(key) {
+			if (key in props) {
+				return `${props[key].toFixed(2)} Mbps`;
+			} else {
+				return '[No results]';
+			}
+		}
+		const rows = [
+			["Dec 2014", "fcc_advertised_down_dec_2014", "fcc_advertised_up_dec_2014"],
+			["Jun 2015", "fcc_advertised_down_jun_2015", "fcc_advertised_up_jun_2015"],
+			["Dec 2015", "fcc_advertised_down_dec_2015", "fcc_advertised_up_dec_2015"],
+			["Jun 2016", "fcc_advertised_down_jun_2016", "fcc_advertised_up_jun_2016"],
+			["Dec 2016", "fcc_advertised_down_dec_2016", "fcc_advertised_up_dec_2016"],
+			["Jun 2017", "fcc_advertised_down_jun_2017", "fcc_advertised_up_jun_2017"],
+		];
+		const formatRow = ([time, dl_key, ul_key]) =>
+			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
+			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
+
+		var measureGroup = document.getElementById('measurement');
+		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
+
+		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
+			'<em>Source:' + dataset + '</em>' +
+			'<div class="report">' +
+			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			rows.map(formatRow).join('\n') +
+			'</div>'
+		);
+	}
+
+	function diffPopupTemplate(props){
+		console.log(props);
+
+		function rate(key1,key2) {
+			if (key1 in props && key2 in props) {
+				let diff = props[key1]-props[key2];
+				return `${diff.toFixed(2)} Mbps`;
+			} else {
+				return '[No results]';
+			}
+		}
+		const rows = [
+			["Dec 2014", "fcc_advertised_down_dec_2014", "ml_download_Mbps_dec_2014", "fcc_advertised_up_dec_2014", "ml_upload_Mbps_dec_2014"],
+			["Jun 2015", "fcc_advertised_down_jun_2015", "ml_download_Mbps_jun_2015", "fcc_advertised_up_jun_2015", "ml_upload_Mbps_jun_2015"],
+			["Dec 2015", "fcc_advertised_down_dec_2015", "ml_download_Mbps_dec_2015", "fcc_advertised_up_dec_2015", "ml_upload_Mbps_dec_2015"],
+			["Jun 2016", "fcc_advertised_down_jun_2016", "ml_download_Mbps_jun_2016", "fcc_advertised_up_jun_2016", "ml_upload_Mbps_jun_2016"],
+			["Dec 2016", "fcc_advertised_down_dec_2016", "ml_download_Mbps_dec_2016", "fcc_advertised_up_dec_2016", "ml_upload_Mbps_dec_2016"],
+			["Jun 2017", "fcc_advertised_down_jun_2017", "ml_download_Mbps_jun_2017", "fcc_advertised_up_jun_2017", "ml_upload_Mbps_jun_2017"]
+		];
+		const formatRow = ([time, dl_key_fcc, dl_key_mlab, ul_key_fcc, ul_key_mlab]) =>
+			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key_fcc,dl_key_mlab)}</div>` +
+			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key_fcc,ul_key_mlab)}</div>`;
+
+		var measureGroup = document.getElementById('measurement');
+		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
+
+		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
+			'<em>Source:' + dataset + '</em>' +
+			'<div class="report">' +
+			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			rows.map(formatRow).join('\n') +
+			'</div>'
+		);
+	}
 
 function makeColorRamp(){
 		
 		var measureGroup = document.getElementById('measurement');
 		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
-		var geo_layer = dataset + '_' + document.getElementById('geo').value;
-		var time_period = time_periods[document.getElementById('slider').value];
 		var measure = document.getElementById('measurement').value;
 		var state = document.getElementById('state_select').value;
+		var time_period = time_periods[document.getElementById('slider').value];
+		var field;
+		var filter;
 		
 		if( dataset == 'fcc'){
-			var field = dataset + '_' + measure + time_period[0];
+			field = ['get', dataset + '_' + measure + time_period[0]];
+			filter = ['has', dataset + '_' + measure + time_period[0]];
+			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
+			for (let opt of document.querySelectorAll('select#geo option')) {
+				opt.disabled = unsupported_geos.includes(opt.value);
+			}
+			if (unsupported_geos.includes(document.getElementById('geo').value)) {
+				document.getElementById('geo').value = 'county';
+			}
+			document.getElementById('slider').max = 5;
+			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
+		    time_period = time_periods[document.getElementById('slider').value];
+			popupTemplate = fccPopupTemplate;
+		} else if (dataset == 'mlab') {
+			for (let opt of document.querySelectorAll('select#geo option')) {
+				opt.disabled = false;
+			}
+			field = ['get', 'ml_' + measure + time_period[0]];
+			filter = ['has', 'ml_' + measure + time_period[0]];
+			document.getElementById('slider').max = 8;
+			popupTemplate = mlabPopupTemplate;
+		} else {
+			field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
+			filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
+			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
+			for (let opt of document.querySelectorAll('select#geo option')) {
+				opt.disabled = unsupported_geos.includes(opt.value);
+			}
+			if (unsupported_geos.includes(document.getElementById('geo').value)) {
+				document.getElementById('geo').value = 'county';
+			}
+			document.getElementById('slider').max = 5;
+			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
+		    time_period = time_periods[document.getElementById('slider').value];
 
+			popupTemplate = diffPopupTemplate;
 		}
-		if( dataset == 'mlab' ){
-			var field = 'ml_' + measure + time_period[0];
 
-		}
-		else{
-			dataset == 'nn';
-		}
+		var geo_layer = dataset + '_' + document.getElementById('geo').value;
+
 
 		var ramp =	[ 'interpolate',
 			['linear'],
-			['get', field],
+			field,
 		];
 
 		ramp = ramp.concat(ramps[measure]);
@@ -355,21 +540,18 @@ function makeColorRamp(){
         for(var i=0; i<legend_values.length; i+=2){
         	cssLabels.push(legend_values[i]);
         }
+		cssLabels = cssLabels.filter((breakValue) => Number.isFinite(breakValue));
 
 		//update legend values
-		var c = document.getElementById('legendlabel').children;
-		for (var l in cssLabels) {
-		    c[l].innerHTML = cssLabels[l];
-		}
+		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states','fcc_mlab_county','fcc_mlab_census_tract']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states','difference_county','difference_census_tract']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
 		
 		//filter out nulls
-		var filter = ["has",field];
 		map.setFilter(geo_layer,filter);
 
 		// Set the label to the month
@@ -637,7 +819,7 @@ map.on('load', function () {
     });
 
     map.addLayer({
-        "id": "fcc_mlab_census_tract",
+        "id": "difference_census_tract",
         "type": "fill",
         "source": {
             type: 'vector',
@@ -666,7 +848,7 @@ map.on('load', function () {
 
 
     map.addLayer({
-        "id": "fcc_mlab_county",
+        "id": "difference_county",
         "type": "fill",
         "source": {
             type: 'vector',
@@ -717,46 +899,12 @@ map.on('load', function () {
 	var popup = new mapboxgl.Popup();
 
 	map.on('click', function (e) {
-		 let f = map.queryRenderedFeatures(e.point);
-		// if (f.length) {
-		// 	showPopup(f[0]);
-		// }
-			
-		function rate(key) {
-			if (key in f[0].properties) {
-				return `${f[0].properties[key].toFixed(2)} Mbps`;
-			} else {
-				return '[No results]';
-			}
+		let f = map.queryRenderedFeatures(e.point);
+		if (f.length) {
+			popup.setLngLat(e.lngLat)
+			  .setHTML(popupTemplate(f[0].properties))
+			  .addTo(map);
 		}
-		const rows = [
-			["Dec 2014", "ml_download_Mbps_dec_2014", "ml_upload_Mbps_dec_2014"],
-			["Jun 2015", "ml_download_Mbps_jun_2015", "ml_upload_Mbps_jun_2015"],
-			["Dec 2015", "ml_download_Mbps_dec_2015", "ml_upload_Mbps_dec_2015"],
-			["Jun 2016", "ml_download_Mbps_jun_2016", "ml_upload_Mbps_jun_2016"],
-			["Dec 2016", "ml_download_Mbps_dec_2016", "ml_upload_Mbps_dec_2016"],
-			["Jun 2017", "ml_download_Mbps_jun_2017", "ml_upload_Mbps_jun_2017"],
-			["Dec 2017", "ml_download_Mbps_dec_2017", "ml_upload_Mbps_dec_2017"],
-			["Jun 2018", "ml_download_Mbps_jun_2018", "ml_upload_Mbps_jun_2018"],
-			["Dec 2018", "ml_download_Mbps_dec_2018", "ml_upload_Mbps_dec_2018"],
-		];
-		const formatRow = ([time, dl_key, ul_key]) => 
-			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
-			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
-		
-		var measureGroup = document.getElementById('measurement');
-		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
-
-		popup.setLngLat(e.lngLat)
-			.setHTML(
-				'<h2>' + f[0].properties['county_name'] +'</h2>' +
-				'<em>Source:'+ dataset + '</em>'+
-				'<div class="report">' +
-				'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
-				rows.map(formatRow).join('\n') +
-				'</div>'
-				)
-			.addTo(map);
 	});
 	 
 	// Change the cursor to a pointer when the mouse is over the states layer.
