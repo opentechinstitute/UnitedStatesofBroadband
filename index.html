@@ -345,7 +345,7 @@ var ramps = {
 				5, '#80cdc1',
 				10, '#35978f',
 				15, '#01665e',
-				25, '#8B4225'],
+				25, '#003b34'],
 	'compare_down_': [-Infinity, '#8c510a',
 				-25, '#8c510a',
 				-15, '#bf812d',
@@ -356,7 +356,7 @@ var ramps = {
 				5, '#80cdc1',
 				10, '#35978f',
 				15, '#01665e',
-				25, '#8B4225']
+				25, '#003b34']
 };
 
 	function mlabPopupTemplate(props) {
@@ -395,8 +395,6 @@ var ramps = {
 	}
 
 	function fccPopupTemplate(props) {
-		//console.log(props);
-
 		function rate(key) {
 			if (key in props) {
 				return `${props[key].toFixed(2)} Mbps`;
@@ -429,8 +427,6 @@ var ramps = {
 	}
 
 	function diffPopupTemplate(props){
-		console.log(props);
-
 		function rate(key1,key2) {
 			if (key1 in props && key2 in props) {
 				let diff = props[key1]-props[key2];
@@ -457,7 +453,7 @@ var ramps = {
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			'<div class="report-header">Download Difference</div><div class="report-header">Upload Difference</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
@@ -474,8 +470,6 @@ function makeColorRamp(){
 		var filter;
 		
 		if( dataset == 'fcc'){
-			field = ['get', dataset + '_' + measure + time_period[0]];
-			filter = ['has', dataset + '_' + measure + time_period[0]];
 			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
 			for (let opt of document.querySelectorAll('select#geo option')) {
 				opt.disabled = unsupported_geos.includes(opt.value);
@@ -487,6 +481,8 @@ function makeColorRamp(){
 			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
 		    time_period = time_periods[document.getElementById('slider').value];
 			popupTemplate = fccPopupTemplate;
+			field = ['get', dataset + '_' + measure + time_period[0]];
+			filter = ['has', dataset + '_' + measure + time_period[0]];
 		} else if (dataset == 'mlab') {
 			for (let opt of document.querySelectorAll('select#geo option')) {
 				opt.disabled = false;
@@ -496,8 +492,6 @@ function makeColorRamp(){
 			document.getElementById('slider').max = 8;
 			popupTemplate = mlabPopupTemplate;
 		} else {
-			field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
-			filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
 			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
 			for (let opt of document.querySelectorAll('select#geo option')) {
 				opt.disabled = unsupported_geos.includes(opt.value);
@@ -508,8 +502,9 @@ function makeColorRamp(){
 			document.getElementById('slider').max = 5;
 			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
 		    time_period = time_periods[document.getElementById('slider').value];
-
 			popupTemplate = diffPopupTemplate;
+			field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
+			filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
 		}
 
 		var geo_layer = dataset + '_' + document.getElementById('geo').value;
