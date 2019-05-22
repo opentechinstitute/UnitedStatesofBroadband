@@ -291,7 +291,8 @@ var ramps = {
 				5, '#E6B71E',
 				10, '#B86B25',
 				25, '#8B4225',
-				50, '#723122'],
+				50, '#723122',
+				100, '#612717'],
 	'min_rtt_': [0, '#723122',
 				5, '#8B4225',
 				10, '#B86B25',
@@ -537,11 +538,8 @@ function makeColorRamp(){
 
 		var legend_values = ramps[measure];
 
-		let cssRamp	= "";
-        for(var i=1; i<legend_values.length; i+=2){
-        	cssRamp = cssRamp + "," + legend_values[i];
-        }
-        cssRamp = 'linear-gradient(to right' + cssRamp + ')';
+		let cssRamp	= legend_values.filter((_, idx) => idx % 2 != 0).join(',');
+		cssRamp = `linear-gradient(to right, ${cssRamp})`;
 		
         //update legend colors
 		document.getElementById('legend').style.background = cssRamp;
