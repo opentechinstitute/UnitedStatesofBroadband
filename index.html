@@ -503,8 +503,14 @@ function makeColorRamp(){
 			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
 		    time_period = time_periods[document.getElementById('slider').value];
 			popupTemplate = diffPopupTemplate;
-			field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
-			filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
+			if(measure == 'compare_down_'){
+				field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
+				filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
+			}
+			else {
+				field = ['-', ['get', 'fcc_advertised_up_' + time_period[0]], ['get', 'ml_upload_Mbps_' + time_period[0]]];
+				filter = ['all', ['has', 'fcc_advertised_up_' + time_period[0]], ['has', 'ml_upload_Mbps_' + time_period[0]]];
+			}
 		}
 
 		var geo_layer = dataset + '_' + document.getElementById('geo').value;
