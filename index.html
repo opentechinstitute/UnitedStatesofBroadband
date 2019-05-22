@@ -115,6 +115,17 @@
 			max-height: 15em;
 			overflow: scroll;
 		}
+
+		details {
+			padding-left: 2em;
+			padding-right: 2em;
+			max-width: 18em;
+		}
+
+		summary {
+			position: relative;
+			left: -2em;
+		}
     </style>
 </head>
 <body>
@@ -147,6 +158,13 @@
 		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
 		  </optgroup>
 		</select>
+		<div style="width:100%;">
+		<details>
+			<summary>Sources & Data Notes:</summary>
+				<strong><a href="https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477">FCC 477</a></strong> data represents the advertized speeds as reported by the ISPs for a given census tract, if the ISP could service 1 household in that census tract. To provide a unified value for the census tract, we have taken all of the advertized speeds available, and shown the median value based on the speeds reported from the ISPs. <br /><br />
+				<strong><a href="https://www.measurementlab.net/tests/ndt/">M-Lab NDT</a></strong> data are Network Diagnostic Tool (NDT) measurements gathered from internet users running NDT against M-Lab servers. The data are aggregated into the reporting time periods for the FCC 477 data.
+		</details>
+		</div>
 		<label for="geo">Area <abbr title="Choose the detail level of the places on the map.">?</abbr></label> 
 		<select id="geo" name="geo">
 		  <option value="county">County</option>
@@ -159,7 +177,7 @@
 		<label for="slider">Time Period <abbr title="Choose the time period to show on the map.">?</abbr></label>
 		<label id='time_period'></label>
 		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
-		<label for="state_select">Zoom to State</label>
+		<label for="state_select">Zoom to State <abbr title="Center the map on a specific state.">?</abbr></label>
 		<select id="state_select" name="state_select">
 		</select>
 		<!-- Dataset: <select id="data" name="data">
@@ -182,11 +200,6 @@
 		    <div class='label'>0</div>
 		  </div>
 		</div>
-	</div>
-	<div class='citation'>
-			<h3>Sources & Data Notes:</h3>
-			<strong><a href="https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477">FCC 477</a></strong> data represents the advertized speeds as reported by the ISPs for a given census tract, if the ISP could service 1 household in that census tract. To provide a unified value for the census tract, we have taken all of the advertized speeds available, and shown the median value based on the speeds reported from the ISPs. <br /><br />
-			<strong><a href="https://www.measurementlab.net/tests/ndt/">M-Lab NDT</a></strong> data are Network Diagnostic Tool (NDT) measurements gathered from internet users running NDT against M-Lab servers. The data are aggregated into the reporting time periods for the FCC 477 data.
 	</div>
 </div>
 
