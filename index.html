@@ -129,17 +129,18 @@
 		  <!-- <option value="dl_bb_cutoffs">Download Broadband Cutoffs</option>
 		  <option value="ul_bb_cutoffs">Upload Broadband Cutoffs</option> -->
 		  <optgroup label="M-Lab" id="mlab">
-		  <option value="download_Mbps_">Download Median (Mbps)</option>
-		  <option value="upload_Mbps_">Upload Median (Mbps)</option>
-		  <option value="min_rtt_">RTT</option>
-		  <option value="dl_count_tests_">Download Tests (count)</option>
-		  <option value="ul_count_tests_">Upload Tests (count)</option>
-		  <option value="dl_count_ips_">Download IPs (count)</option>
-		  <option value="ul_count_ips_">Upload IPs (count)</option>
+			<option value="download_Mbps_">Download Median (Mbps)</option>
+			<option value="upload_Mbps_">Upload Median (Mbps)</option>
+			<option value="min_rtt_">RTT</option>
+			<option value="dl_count_tests_">Download Tests (count)</option>
+			<option value="ul_count_tests_">Upload Tests (count)</option>
+			<option value="dl_count_ips_">Download IPs (count)</option>
+			<option value="ul_count_ips_">Upload IPs (count)</option>
 		  </optgroup>
 		  <optgroup label="FCC Data" id="fcc">
-		  <option value="advertised_down_">Advertised Download Median (Mbps)</option>
-		  <option value="advertised_up_">Advertised Upload Median (Mbps)</option>
+			<option value="advertised_down_">Advertised Download Median (Mbps)</option>
+			<option value="advertised_up_">Advertised Upload Median (Mbps)</option>
+			<!-- <option value="provider_count_">Number of Providers (count)</option> -->
 		  </optgroup>
 		  <optgroup label="Comparison of M-Lab & FCC" id="difference">
 		  	<option value="compare_down_">Difference (FCC - MLab) Download Medians</option>
@@ -276,24 +277,28 @@ var states_centers = [
     ["Wyoming", [42.755966, -107.302490], 5]];
 
 var ramps = {
-	'download_Mbps_': [0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'],
-	'upload_Mbps_': [0, '#fff',
-				5, '#EED322',
+	'download_Mbps_': [-Infinity, '#fff',
+				0.2, '#ffff5e',
+				4, '#EED322',
 				10, '#E6B71E',
-				20, '#B86B25',
-				30, '#8B4225',
+				25, '#B86B25',
+				50, '#8B4225',
+				100, '#723122'],
+	'upload_Mbps_': [-Infinity, '#fff',
+				0.2, '#ffff91',
+				1, '#ffff5e',
+				3, '#EED322',
+				5, '#E6B71E',
+				10, '#B86B25',
+				25, '#8B4225',
 				50, '#723122'],
-	'min_rtt_': [0, '#fff',
-				25, '#EED322',
-				50, '#E6B71E',
-				75, '#B86B25',
-				100, '#8B4225',
-				300, '#723122'],
+	'min_rtt_': [0, '#723122',
+				5, '#8B4225',
+				10, '#B86B25',
+				25, '#E6B71E',
+				50, '#EED322',
+				100, '#ffff5e',
+				300, '#fff'],
 	'dl_count_tests_': [100, '#fff',
 				500, '#EED322',
 				1000, '#E6B71E',
@@ -318,23 +323,27 @@ var ramps = {
 				5000, '#B86B25',
 				10000, '#8B4225',
 				25000, '#723122'],
-	'advertised_down_': [0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'],
-	'advertised_up_': [0, '#fff',
-				5, '#EED322',
-				10, '#E6B71E',
-				20, '#B86B25',
-				30, '#8B4225',
+	'provider_count_': [0, '#fff',
+				1, '#EED322',
+				5, '#E6B71E',
+				10, '#B86B25',
+				25, '#8B4225',
 				50, '#723122'],
-	'state_select':['#60af83'],
-	'dl_bb_cutoffs': [0, '#fff',
-				10, '#EED322'],
-	'ul_bb_cutoffs': [0, '#fff',
-				1, '#EED322'],
+	'advertised_down_': [-Infinity, '#fff',
+				0.2, '#ffff5e',
+				4, '#EED322',
+				10, '#E6B71E',
+				25, '#B86B25',
+				50, '#8B4225',
+				100, '#723122'],
+	'advertised_up_': [-Infinity, '#fff',
+				0.2, '#ffff91',
+				1, '#ffff5e',
+				3, '#EED322',
+				5, '#E6B71E',
+				10, '#B86B25',
+				25, '#8B4225',
+				50, '#723122'],
 	'compare_up_': [-Infinity, '#8c510a',
 				-25, '#8c510a',
 				-15, '#bf812d',
