@@ -126,8 +126,6 @@
 		<h2>United States of Broadband</h2>
 		<label for="measurement">Data</label>
 		<select id="measurement" name="measurement">
-		  <!-- <option value="dl_bb_cutoffs">Download Broadband Cutoffs</option>
-		  <option value="ul_bb_cutoffs">Upload Broadband Cutoffs</option> -->
 		  <optgroup label="M-Lab" id="mlab">
 			<option value="download_Mbps_">Download Median (Mbps)</option>
 			<option value="upload_Mbps_">Upload Median (Mbps)</option>
@@ -202,7 +200,7 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoibmV3YW1lcmljYSIsImEiOiIyM3ZnYUtrIn0.57fFgg_iM7S1wLH2GQC71g';
 var map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v10',
+    style: 'mapbox://styles/newamerica/cjpn4e4df2gak2rp7nef3am21',
     zoom: 4,
     center: [-97.754807, 38.674870]
 });
@@ -556,7 +554,7 @@ function makeColorRamp(){
 		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','us_states','difference_county','difference_census_tract']){
+		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -570,6 +568,16 @@ function makeColorRamp(){
 
 
 map.on('load', function () {
+
+	var layers = map.getStyle().layers;
+	// Find the index of the first symbol layer in the map style
+	var firstSymbolId;
+	for (var i = 0; i < layers.length; i++) {
+		if (layers[i].type === 'symbol') {
+		firstSymbolId = layers[i].id;
+		break;
+		}
+	}
 
 	// add states to selector
 	 var c = document.getElementById('state_select');
@@ -885,9 +893,9 @@ map.on('load', function () {
         }
     });
 
-    map.addLayer({
+   map.addLayer({
         "id": "us_states",
-        "type": "fill",
+        "type": "line",
         "source": {
             type: 'vector',
             url: 'mapbox://newamerica.cjvopv39u05jt2wmna9mg5wz4-7j8om'
@@ -897,8 +905,8 @@ map.on('load', function () {
 			},
         "source-layer": "us_states",
         "paint": {
-            "fill-color": "#60af83",
-            "fill-opacity": 0.3
+            "line-color": "#000",
+            "line-width": 0.5
         }
     });
 
