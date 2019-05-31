@@ -243,7 +243,7 @@ var states_centers = [
     ["Maine", [45.33, -69.48, 6]],
     ["Maryland", [39.063946, -76.802101, 5]],
     ["Massachusetts", [42.230171, -71.530106, 5]],
-    ["Michigan", [44.28, -87.40, 5.5]],
+    ["Michigan", [43.326618, -87.40, 5.5]],
     ["Minnesota", [45.694454, -93.900192, 5]],
     ["Mississippi", [32.741646, -89.678696, 6]],
     ["Missouri", [38.456085, -92.288368, 5]],
@@ -554,7 +554,7 @@ function makeColorRamp(){
 		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_county','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract']){
+		for( let lyr of ['mlab_zcta','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract','mlab_county']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');

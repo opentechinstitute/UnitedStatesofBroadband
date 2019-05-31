@@ -7,7 +7,7 @@ WITH districts AS (
   FROM
     `mlab-sandbox.usa_geo.us_counties`
 ),
-mlab_dl AS (
+dl AS (
   SELECT
     tests.*,
     FORMAT(
@@ -36,7 +36,7 @@ mlab_dl AS (
       AND '2018-12-31'
     )
 ),
-mlab_ul AS (
+ul AS (
   SELECT
     tests.*,
     FORMAT(
@@ -111,8 +111,8 @@ SELECT
   ARRAY(
     SELECT AS STRUCT
       time_period,
-      COUNT(test_id) AS test_count,
-      COUNT(DISTINCT connection_spec.client_ip) AS ip_count,
+      COUNT(test_id) AS count_tests,
+      COUNT(DISTINCT connection_spec.client_ip) AS count_ips,
       APPROX_QUANTILES(
         8 * SAFE_DIVIDE(
           web100_log_entry.snap.HCThruOctetsAcked,
@@ -121,22 +121,22 @@ SELECT
           )
         ),
         101
-      ) [SAFE_ORDINAL(51)] AS tx_Mbps,
+      ) [SAFE_ORDINAL(51)] AS download_Mbps,
       APPROX_QUANTILES(
         CAST(web100_log_entry.snap.MinRTT AS FLOAT64),
         101
       ) [ORDINAL(51)] as min_rtt
     FROM
-      mlab_dl
-    WHERE mlab_dl.geo_id = districts.geo_id
+      dl
+    WHERE dl.geo_id = districts.geo_id
     GROUP BY
       time_period
-  ) mlab_dl,
+  ) dl,
   ARRAY(
     SELECT AS STRUCT
       time_period,
-      COUNT(test_id) AS test_count,
-      COUNT(DISTINCT connection_spec.client_ip) AS ip_count,
+      COUNT(test_id) AS count_tests,
+      COUNT(DISTINCT connection_spec.client_ip) AS count_ips,
       APPROX_QUANTILES(
         8 * SAFE_DIVIDE(
           web100_log_entry.snap.HCThruOctetsReceived,
@@ -145,14 +145,14 @@ SELECT
           )
         ),
         101
-      ) [SAFE_ORDINAL(51)] AS tx_Mbps
+      ) [SAFE_ORDINAL(51)] AS upload_Mbps
     FROM
-      mlab_ul
+      ul
     WHERE
-      mlab_ul.geo_id = districts.geo_id
+      ul.geo_id = districts.geo_id
     GROUP BY
       time_period
-  ) AS mlab_ul,
+  ) AS ul,
   fcc_timeslices.* EXCEPT (geo_id),
   districts.geo_id,
   districts.name,
