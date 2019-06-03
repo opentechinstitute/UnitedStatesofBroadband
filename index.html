@@ -155,6 +155,10 @@
 		  	<option value="compare_down_">Difference (FCC - MLab) Download Medians</option>
 		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
 		  </optgroup>
+		  <optgroup label="USBB" id="usbb">
+		  	<option value="compare_down_">Difference (FCC - MLab) Download Medians</option>
+		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
+		  </optgroup>
 		</select>
 		<div style="width:100%;">
 		<details>
@@ -557,7 +561,7 @@ function makeColorRamp(){
 		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
 
 		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract','mlab_county']){
+		for( let lyr of ['mlab_zcta','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract','mlab_county', 'usbb_zcta']){
 			map.setLayoutProperty(lyr,'visibility','none');
 		};
 		map.setLayoutProperty(geo_layer,'visibility','visible');
@@ -628,6 +632,35 @@ map.on('load', function () {
             url: 'mapbox://newamerica.mlab_zcta'
         },
         "source-layer": "mlab_zcta",
+        //"filter": ["has",'ml_download_Mbps_dec_2018'],
+        "layout": {
+			'visibility': 'visible'
+			},
+        "paint": {
+            "fill-opacity": 0.7,
+            //"fill-outline-color": '#000',
+            "fill-color": [
+				'interpolate',
+				['linear'],
+				['get', 'ml_download_Mbps_dec_2018'],
+				0, '#fff',
+				10, '#EED322',
+				25, '#E6B71E',
+				50, '#B86B25',
+				75, '#8B4225',
+				100, '#723122'
+				]
+        }
+    });
+
+    map.addLayer({
+        "id": "usbb_zcta",
+        "type": "fill",
+        "source": {
+            type: 'vector',
+            url: 'mapbox://newamerica.usbb_zcta'
+        },
+        "source-layer": "usbb_zcta",
         //"filter": ["has",'ml_download_Mbps_dec_2018'],
         "layout": {
 			'visibility': 'visible'
