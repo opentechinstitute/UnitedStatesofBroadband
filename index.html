@@ -284,6 +284,17 @@ var popupFn;
 		);
 	}
 
+	function mkRamp({
+		displayName, internalName, popupFn, mapboxGlStyleFn, stops
+	}) {
+		let styleFn = mapboxGlStyleFn;
+		return {
+			displayName, internalName, popupFn, stops, mapboxGlStyleFn(timePeriod) {
+				styleFn(timePeriod, stops);
+			}
+		};
+	}
+
 	var config = {
 		time_periods: // time periods, as an array of [internalName, displayName]
 			[['dec_2014', 'Dec 2014'],
@@ -358,38 +369,43 @@ var popupFn;
 				['Senate Districts', 'state_senate', 'mapbox://newamerica.usbb_state_senate', 'usbb_state_senate'],
 				['House Districts', 'state_house', 'mapbox://newamerica.usbb_state_house', 'usbb_state_house'],
 			],
-		ramps: // Array of display styling info, {displayName, internalName, mapboxGlStyleFn, popupFn}
-			[{
+		ramps: // Array of display styling info, {displayName, internalName, mapboxGlStyleFn, stops, popupFn}
+			[mkRamp({
 				displayName: 'MLab Median Download',
 				internalName: 'mlab_download_Mbps',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], 
-						-Infinity, '#fff',
-						0.2, '#ffff5e',
-						4, '#EED322',
-						10, '#E6B71E',
-						25, '#B86B25',
-						50, '#8B4225',
-						100, '#723122'
-					];
-				}
-			}, {
+					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops];
+				},
+				stops: [
+					-Infinity, '#fff',
+					0.2, '#ffff5e',
+					4, '#EED322',
+					10, '#E6B71E',
+					25, '#B86B25',
+					50, '#8B4225',
+					100, '#723122'
+				]
+			}), mkRamp({
 				displayName: 'MLab Median Upload',
 				internalName: 'mlab_upload_Mbps',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], -Infinity, '#fff',
-						0.2, '#ffff91',
-						1, '#ffff5e',
-						3, '#EED322',
-						5, '#E6B71E',
-						10, '#B86B25',
-						25, '#8B4225',
-						50, '#723122',
-						100, '#612717'];
-				}
-			}, {
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['case', 
+					    ['has', `ml_upload_Mbps_${timePeriod}`],
+						['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], ...stops],
+						'#00FF00'];
+				},
+				stops: [							-Infinity, '#fff',
+							0.2, '#ffff91',
+							1, '#ffff5e',
+							3, '#EED322',
+							5, '#E6B71E',
+							10, '#B86B25',
+							25, '#8B4225',
+							50, '#723122',
+							100, '#612717']
+			}), {
 				displayName: 'MLab Median RTT',
 				internalName: 'mlab_min_rtt',
 				popupFn: mlabPopupFn,
@@ -636,15 +652,17 @@ function configureMap() {
 	const measure = document.getElementById('measurement').value;
 	const geo = document.getElementById('geo').value;
 	const timeIndex = document.getElementById('slider').value;
-	const timePeriod = config.time_periods[timeIndex];
+	const timePeriod = config.time_periods[timeIndex][0];
 
 	const ramp = config.ramps.find((ramp) => ramp.internalName == measure);
 	const style = ramp.mapboxGlStyleFn(timePeriod);
+	console.log(style);
 
 	for (const layer of config.geo_units) {
 		map.setLayoutProperty(layer[1], 'visibility', layer[1] == geo ? 'visible' : 'none');
 		map.setPaintProperty(layer[1], 'fill-color', style);
 	}
+	popupFn = ramp.popupFn;
 }
 
     const measureSelect = document.getElementById('measurement');
@@ -675,6 +693,19 @@ function configureMap() {
 	[measureSelect, geoSelect, timeSlider].forEach((el) => el.addEventListener('input', () => {
 		configureMap();
 	}))
+	stateSelector.addEventListener('input', (el) => {
+		console.log(stateSelector.value);
+		const state = config.state_centers.find((row) => row[0] == stateSelector.value);
+		console.log(state);
+		if (state) {
+			const [ lat, lon, zoom ] = state[1];
+			console.log({lon,lat,zoom});
+			map.flyTo({
+				center: { lon, lat },
+				zoom
+			});
+		}
+	});
 	map.on('load', function () {
 		for (const [_, id, url, sourceLayer] of config.geo_units) {
 			map.addLayer({
@@ -682,8 +713,21 @@ function configureMap() {
 				type: "fill",
 				source: { url, type: "vector" },
 				"source-layer": sourceLayer,
-				layout: { visibility: 'none' }
+				layout: { visibility: 'none' },
+				paint: {
+					'fill-opacity': 0.7
+				}
 			})
+
+			// Change the cursor to a pointer when the mouse is over the states layer.
+			map.on('mouseenter', id, () => {
+				map.getCanvas().style.cursor = 'pointer';
+			});
+
+			// Change it back to a pointer when it leaves.
+			map.on('mouseleave', id, () => {
+				map.getCanvas().style.cursor = '';
+			});
 		}
 
 		map.addLayer({
@@ -703,30 +747,19 @@ function configureMap() {
 			}
 		});
 
+		var popup = new mapboxgl.Popup();
 
-		// // When a click event occurs on a feature in the states layer, open a popup at the
-		// // location of the click, with description HTML from its properties.
+        const layers = config.geo_units.map((g) => g[1]);
+		map.on('click', (e) => {
+			let f = map.queryRenderedFeatures(e.point, {layers});
+			if (f.length) {
+				console.log(f);
+				popup.setLngLat(e.lngLat)
+					.setHTML(popupFn(f[0].properties))
+					.addTo(map);
+			}
+		});
 
-		// var popup = new mapboxgl.Popup();
-
-		// map.on('click', function (e) {
-		// 	let f = map.queryRenderedFeatures(e.point);
-		// 	if (f.length) {
-		// 		popup.setLngLat(e.lngLat)
-		// 			.setHTML(popupTemplate(f[0].properties))
-		// 			.addTo(map);
-		// 	}
-		// });
-
-		// // Change the cursor to a pointer when the mouse is over the states layer.
-		// map.on('mouseenter', 'mlab_county', function () {
-		// 	map.getCanvas().style.cursor = 'pointer';
-		// });
-
-		// // Change it back to a pointer when it leaves.
-		// map.on('mouseleave', 'mlab_county', function () {
-		// 	map.getCanvas().style.cursor = '';
-		// });
 
 
 		// // Read settings from URL, if any.
