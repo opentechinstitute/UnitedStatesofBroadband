@@ -157,7 +157,6 @@
 
 		<div class='session'>
 		  <h3>Data Range</h3>
-		  Units: (Mbps)
 		  <div id='legend' class='row colors'>
 		  </div>
 		  <div id="legendlabel" class='row labels'>
@@ -287,10 +286,10 @@ var popupFn;
 	function mkRamp({
 		displayName, internalName, popupFn, mapboxGlStyleFn, stops
 	}) {
-		let styleFn = mapboxGlStyleFn;
+		const styleFn = mapboxGlStyleFn;
 		return {
 			displayName, internalName, popupFn, stops, mapboxGlStyleFn(timePeriod) {
-				styleFn(timePeriod, stops);
+				return styleFn(timePeriod, stops);
 			}
 		};
 	}
@@ -374,7 +373,7 @@ var popupFn;
 				displayName: 'MLab Median Download',
 				internalName: 'mlab_download_Mbps',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
+				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops];
 				},
 				stops: [
@@ -396,273 +395,219 @@ var popupFn;
 						['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], ...stops],
 						'#00FF00'];
 				},
-				stops: [							-Infinity, '#fff',
-							0.2, '#ffff91',
-							1, '#ffff5e',
-							3, '#EED322',
-							5, '#E6B71E',
-							10, '#B86B25',
-							25, '#8B4225',
-							50, '#723122',
-							100, '#612717']
-			}), {
+				stops: [
+					-Infinity, '#fff',
+					0.2, '#ffff91',
+					1, '#ffff5e',
+					3, '#EED322',
+					5, '#E6B71E',
+					10, '#B86B25',
+					25, '#8B4225',
+					50, '#723122',
+					100, '#612717']
+			}), mkRamp({
 				displayName: 'MLab Median RTT',
 				internalName: 'mlab_min_rtt',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], 0, '#723122',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], ...stops];
+				},
+				stops: [0, '#723122',
 						5, '#8B4225',
 						10, '#B86B25',
 						25, '#E6B71E',
 						50, '#EED322',
 						100, '#ffff5e',
-						300, '#fff'];
-				}
-			}, {
+						300, '#fff']
+			}), mkRamp({
 				displayName: 'MLab Download Test Count',
 				internalName: 'mlab_dl_count_tests',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], 100, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], ...stops];
+				},
+				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
 						5000, '#B86B25',
 						10000, '#8B4225',
-						25000, '#723122'];
-				}
-			}, {
+						25000, '#723122']
+			}), mkRamp({
 				displayName: 'MLab Upload Test Count',
 				internalName: 'mlab_ul_count_tests',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], 100, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], ...stops];
+				},
+				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
 						5000, '#B86B25',
 						10000, '#8B4225',
-						25000, '#723122'];
-				}
-			}, {
+						25000, '#723122']
+			}), mkRamp({
 				displayName: 'MLab Unique Download IPs',
 				internalName: 'mlab_dl_count_ips',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], 100, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], ...stops];
+				},
+				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
 						5000, '#B86B25',
 						10000, '#8B4225',
-						25000, '#723122'];
-				}
-			}, {
+						25000, '#723122']
+			}), mkRamp({
 				displayName: 'MLab Unique Upload IPs',
 				internalName: 'mlab_ul_count_ips',
 				popupFn: mlabPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], 100, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], ...stops];
+				},
+				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
 						5000, '#B86B25',
 						10000, '#8B4225',
-						25000, '#723122'];
-				}
-			}, {
+						25000, '#723122']
+			}), mkRamp({
 				displayName: 'FCC Unique Provider Count',
 				internalName: 'fcc_provider_count',
 				popupFn: fccPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `fcc_provider_count_${timePeriod}`], 0, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_provider_count_${timePeriod}`], ...stops];
+				}, 
+				stops: [0, '#fff',
 						1, '#EED322',
 						5, '#E6B71E',
 						10, '#B86B25',
 						25, '#8B4225',
-						50, '#723122'];
-				}
-			}, {
+						50, '#723122']
+			}), mkRamp({
 				displayName: 'FCC Advertised Download Speed',
 				internalName: 'fcc_advertised_dl',
 				popupFn: fccPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], -Infinity, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], ...stops];
+				},
+				stops: [-Infinity, '#fff',
 						0.2, '#ffff5e',
 						4, '#EED322',
 						10, '#E6B71E',
 						25, '#B86B25',
 						50, '#8B4225',
-						100, '#723122'];
-				}
-			}, {
+						100, '#723122']
+			}), mkRamp({
 				displayName: 'FCC Advertised Upload Speed',
 				internalName: 'fcc_advertised_ul',
 				popupFn: fccPopupFn,
-				mapboxGlStyleFn(timePeriod) {
-					return ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], -Infinity, '#fff',
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], ...stops];
+				},
+				stops: [-Infinity, '#fff',
 						0.2, '#ffff91',
 						1, '#ffff5e',
 						3, '#EED322',
 						5, '#E6B71E',
 						10, '#B86B25',
 						25, '#8B4225',
-						50, '#723122'];
-				}
-			}, {
+						50, '#723122']
+			}), mkRamp({
 				displayName: 'Download Comparison (FCC - MLab)',
 				internalName: 'mlab_fcc_dl_comp',
 				popupFn: diffPopupFn,
-				mapboxGlStyleFn(timePeriod) {
+				mapboxGlStyleFn(timePeriod, stops) {
 					return [
 						'interpolate',
 						['linear'],
 						['-', ['get', `fcc_advertised_down_${timePeriod}`], ['get', `ml_download_Mbps_${timePeriod}`]],
-						-Infinity, '#8c510a',
-						-25, '#8c510a',
-						-15, '#bf812d',
-						-10, '#dfc27d',
-						-5, '#f6e8c3',
-						-1, '#f5f5f5',
-							1, '#c7eae5',
-							5, '#80cdc1',
-							10, '#35978f',
-							15, '#01665e',
-							25, '#003b34'
+						...stops
 					];
-				}
-			}, {
+				},
+				stops: [
+					-Infinity, '#8c510a',
+					-25, '#8c510a',
+					-15, '#bf812d',
+					-10, '#dfc27d',
+					-5, '#f6e8c3',
+					-1, '#f5f5f5',
+					1, '#c7eae5',
+					5, '#80cdc1',
+					10, '#35978f',
+					15, '#01665e',
+					25, '#003b34'
+				]
+			}), mkRamp({
 				displayName: 'Upload Comparison (FCC - MLab)',
 				internalName: 'mlab_fcc_ul_comp',
 				popupFn: diffPopupFn,
-				mapboxGlStyleFn(timePeriod) {
+				mapboxGlStyleFn(timePeriod, stops) {
 					return [
 						'interpolate',
 						['linear'],
-						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]],
-						-Infinity, '#8c510a',
-						-25, '#8c510a',
-						-15, '#bf812d',
-						-10, '#dfc27d',
-						-5, '#f6e8c3',
-						-1, '#f5f5f5',
-							1, '#c7eae5',
-							5, '#80cdc1',
-							10, '#35978f',
-							15, '#01665e',
-							25, '#003b34'];
-				}
-			}
+						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]], ...stops];
+				},
+				stops: [
+					-Infinity, '#8c510a',
+					-25, '#8c510a',
+					-15, '#bf812d',
+					-10, '#dfc27d',
+					-5, '#f6e8c3',
+					-1, '#f5f5f5',
+					1, '#c7eae5',
+					5, '#80cdc1',
+					10, '#35978f',
+					15, '#01665e',
+					25, '#003b34']
+			})
 			]
 	};
 
-// function makeColorRamp(){
-		
-// 		var measureGroup = document.getElementById('measurement');
-// 		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
-// 		var measure = document.getElementById('measurement').value;
-// 		var state = document.getElementById('state_select').value;
-// 		var time_period = time_periods[document.getElementById('slider').value];
-// 		var field;
-// 		var filter;
-		
-// 		if( dataset == 'fcc'){
-// 			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
-// 			for (let opt of document.querySelectorAll('select#geo option')) {
-// 				opt.disabled = unsupported_geos.includes(opt.value);
-// 			}
-// 			if (unsupported_geos.includes(document.getElementById('geo').value)) {
-// 				document.getElementById('geo').value = 'county';
-// 			}
-// 			document.getElementById('slider').max = 5;
-// 			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
-// 		    time_period = time_periods[document.getElementById('slider').value];
-// 			popupTemplate = fccPopupTemplate;
-// 			field = ['get', dataset + '_' + measure + time_period[0]];
-// 			filter = ['has', dataset + '_' + measure + time_period[0]];
-// 		} else if (dataset == 'mlab') {
-// 			for (let opt of document.querySelectorAll('select#geo option')) {
-// 				opt.disabled = false;
-// 			}
-// 			field = ['get', 'ml_' + measure + time_period[0]];
-// 			filter = ['has', 'ml_' + measure + time_period[0]];
-// 			document.getElementById('slider').max = 8;
-// 			popupTemplate = mlabPopupTemplate;
-// 		} else {
-// 			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
-// 			for (let opt of document.querySelectorAll('select#geo option')) {
-// 				opt.disabled = unsupported_geos.includes(opt.value);
-// 			}
-// 			if (unsupported_geos.includes(document.getElementById('geo').value)) {
-// 				document.getElementById('geo').value = 'county';
-// 			}
-// 			document.getElementById('slider').max = 5;
-// 			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
-// 		    time_period = time_periods[document.getElementById('slider').value];
-// 			popupTemplate = diffPopupTemplate;
-// 			if(measure == 'compare_down_'){
-// 				field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
-// 				filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
-// 			}
-// 			else {
-// 				field = ['-', ['get', 'fcc_advertised_up_' + time_period[0]], ['get', 'ml_upload_Mbps_' + time_period[0]]];
-// 				filter = ['all', ['has', 'fcc_advertised_up_' + time_period[0]], ['has', 'ml_upload_Mbps_' + time_period[0]]];
-// 			}
-// 		}
-
-// 		var geo_layer = dataset + '_' + document.getElementById('geo').value;
+	// Encode the map state into the fragment for linkability.
+	function updateFragment() {
+		var measureGroup = document.getElementById('measurement');
+		const geo = document.getElementById("geo").value;
+		const timeperiod = config.time_periods[document.getElementById("slider").value][0];
+		const measure = document.getElementById("measurement").value;
+		const { lng: x, lat: y } = map.getCenter();
+		const z = map.getZoom();
+		const url = new URL(window.location);
+		url.hash = `#${geo}/${timeperiod}/${measure}/${x.toFixed(2)}/${y.toFixed(2)}/${z.toFixed(2)}`;
+		window.history.replaceState(undefined, 'USBB', url.toString());
+	}
 
 
-// 		var ramp =	[ 'interpolate',
-// 			['linear'],
-// 			field,
-// 		];
-
-// 		ramp = ramp.concat(ramps[measure]);
-
-// 		//update map colors
-// 		map.setPaintProperty(geo_layer,'fill-color',ramp);
-
-// 		var legend_values = ramps[measure];
-
-// 		let cssRamp	= legend_values.filter((_, idx) => idx % 2 != 0).join(',');
-// 		cssRamp = `linear-gradient(to right, ${cssRamp})`;
-		
-//         //update legend colors
-// 		document.getElementById('legend').style.background = cssRamp;
-
-//         let cssLabels = [];
-//         for(var i=0; i<legend_values.length; i+=2){
-//         	cssLabels.push(legend_values[i]);
-//         }
-// 		cssLabels = cssLabels.filter((breakValue) => Number.isFinite(breakValue));
-
-// 		//update legend values
-// 		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
-
-// 		//show one layer
-// 		for( let lyr of ['mlab_zcta','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract','mlab_county', 'usbb_zcta']){
-// 			map.setLayoutProperty(lyr,'visibility','none');
-// 		};
-// 		map.setLayoutProperty(geo_layer,'visibility','visible');
-		
-// 		//filter out nulls
-// 		map.setFilter(geo_layer,filter);
-
-// 		// Set the label to the month
-// 		document.getElementById('time_period').textContent = time_period[1];
-// }
 function configureMap() {
 	const measure = document.getElementById('measurement').value;
 	const geo = document.getElementById('geo').value;
 	const timeIndex = document.getElementById('slider').value;
-	const timePeriod = config.time_periods[timeIndex][0];
+	const timePeriod = config.time_periods[timeIndex];
 
 	const ramp = config.ramps.find((ramp) => ramp.internalName == measure);
-	const style = ramp.mapboxGlStyleFn(timePeriod);
-	console.log(style);
+	const style = ramp.mapboxGlStyleFn(timePeriod[0]);
 
+    // Apply layer visibility and style.
 	for (const layer of config.geo_units) {
 		map.setLayoutProperty(layer[1], 'visibility', layer[1] == geo ? 'visible' : 'none');
 		map.setPaintProperty(layer[1], 'fill-color', style);
 	}
+	// Update popup template.
 	popupFn = ramp.popupFn;
+	// Update legend.
+	const breaks = ramp.stops;
+	const cssRamp = breaks.filter((_, idx) => idx % 2).join(',');
+	document.getElementById('legend').style.background =
+	  `linear-gradient(to right, ${cssRamp})`;
+	const cssLabels = breaks.filter((_, idx) => !(idx % 2)).filter(b => Number.isFinite(b));
+	document.getElementById('legendlabel').innerHTML =
+		cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
+	
+	// Update time period label.
+	document.getElementById('time_period').innerText = timePeriod[1];
+
+	// Update fragment.
+	updateFragment();
 }
 
     const measureSelect = document.getElementById('measurement');
@@ -694,12 +639,9 @@ function configureMap() {
 		configureMap();
 	}))
 	stateSelector.addEventListener('input', (el) => {
-		console.log(stateSelector.value);
 		const state = config.state_centers.find((row) => row[0] == stateSelector.value);
-		console.log(state);
 		if (state) {
 			const [ lat, lon, zoom ] = state[1];
-			console.log({lon,lat,zoom});
 			map.flyTo({
 				center: { lon, lat },
 				zoom
@@ -753,7 +695,6 @@ function configureMap() {
 		map.on('click', (e) => {
 			let f = map.queryRenderedFeatures(e.point, {layers});
 			if (f.length) {
-				console.log(f);
 				popup.setLngLat(e.lngLat)
 					.setHTML(popupFn(f[0].properties))
 					.addTo(map);
@@ -762,96 +703,42 @@ function configureMap() {
 
 
 
-		// // Read settings from URL, if any.
-		// // :dataset/:geo/:timeperiod/:measure/:x/:y/:z
-		// let fragment = window.location.hash;
-		// if (fragment) {
-		// 	const check = (v, test) => test(v) ? v : undefined;
+		// Read settings from URL, if any.
+		// :geo/:timeperiod/:measure/:x/:y/:z
+		let fragment = window.location.hash;
+		if (fragment) {
+			const check = (v, test) => test(v) ? v : undefined;
 
-		// 	const measureGroup = document.getElementById('measurement');
-		// 	const dataset1 = measureGroup.options;
-		// 	console.log(dataset1);
+			const parts = fragment.slice(1).split("/");
+			const geo = check(parts[0], (v) => config.geo_units.some((u) => u[1] == v));
+			const timeperiod = check(parts[1], (v) => config.time_periods.some((x) => x[0] == v));
+			const measure = check(parts[2], (v) => config.ramps.some((r) => r.internalName == v));
+			const x = check(Number(parts[3]), (v) => !Number.isNaN(v));
+			const y = check(Number(parts[4]), (v) => !Number.isNaN(v));
+			const z = check(Number(parts[5]), (v) => !Number.isNaN(v));
 
-		// 	const datasetNames = Array.from(document.querySelectorAll("#data option")).map(el => el.value);
-		// 	console.log(datasetNames);
+			if (geo) {
+				const el = document.querySelector(`#geo [value='${geo}']`) || document.querySelector(`#geo :first-child`);
+				el.selected = true;
+			}
+			if (timeperiod !== undefined) {
+				const idx = config.time_periods.findIndex((x) => x[0] == timeperiod);
+				if (idx >= 0) {
+					document.getElementById('slider').value = idx
+				};
+			}
+			if (measure) {
+				const el = document.querySelector(`#measurement [value='${measure}']`) || document.querySelector(`#measurement :first-child`);
+				el.selected = true;
+			}
+			if ([x, y, z].every(n => n !== undefined)) {
+				map.jumpTo({ center: [x, y], zoom: z });
+			}
+		}
+		// Run the color ramp to start
+		configureMap();
 
-		// 	const geoNames = Array.from(document.querySelectorAll("#geo option")).map(el => el.value);
-		// 	const parts = fragment.slice(1).split("/");
-		// 	const dataset = check(parts[0], (v) => datasetNames.indexOf(v) >= 0);
-		// 	const geo = check(parts[1], (v) => geoNames.indexOf(v) >= 0);
-		// 	const timeperiod = check(parts[2], (v) => time_periods.findIndex((x) => x[0] == v) >= 0);
-		// 	const measure = check(parts[3], (v) => v in ramps);
-		// 	const x = check(Number(parts[4]), (v) => !Number.isNaN(v));
-		// 	const y = check(Number(parts[5]), (v) => !Number.isNaN(v));
-		// 	const z = check(Number(parts[6]), (v) => !Number.isNaN(v));
-
-		// 	if (dataset) {
-		// 		document.querySelector(`#data [value='${dataset}']`).selected = true;
-		// 	}
-		// 	if (geo) {
-		// 		document.querySelector(`#geo [value='${geo}']`).selected = true;
-		// 	}
-		// 	if (timeperiod !== undefined) {
-		// 		document.getElementById('slider').value = time_periods.findIndex((x) => x[0] == timeperiod);
-		// 	}
-		// 	if (measure) {
-		// 		document.querySelector(`#measurement [value='${measure}']`).selected = true;
-		// 	}
-		// 	if ([x, y, z].every(n => n !== undefined)) {
-		// 		map.jumpTo({ center: [x, y], zoom: z });
-		// 	}
-		// }
-
-		// // Encode the map state into the fragment for linkability.  Keep this in sync with the block above.
-		// function updateFragment() {
-		// 	var measureGroup = document.getElementById('measurement');
-		// 	const dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
-		// 	const geo = document.getElementById("geo").value;
-		// 	const timeperiod = time_periods[document.getElementById("slider").value][0];
-		// 	const measure = document.getElementById("measurement").value;
-		// 	const { lng: x, lat: y } = map.getCenter();
-		// 	const z = map.getZoom();
-		// 	const url = new URL(window.location);
-		// 	url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x.toFixed(2)}/${y.toFixed(2)}/${z.toFixed(2)}`;
-		// 	window.history.replaceState(undefined, 'USBB', url.toString());
-		// }
-
-		// // Run the color ramp to start
-		// makeColorRamp();
-
-		// // change things based on selection in the legend
-		// document.getElementById('slider').addEventListener('input', function (e) { makeColorRamp(); updateFragment() });
-		// document.getElementById('measurement').addEventListener('input', function (e) { makeColorRamp(); updateFragment() });
-		// document.getElementById('geo').addEventListener('input', function (e) { makeColorRamp(); updateFragment() });
-		// //document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-
-		// //flyto
-		// document.getElementById('state_select').addEventListener('input', function (e) {
-		// 	// Fly to a random location by offsetting the point -74.50, 40
-		// 	// by up to 5 degrees.
-
-		// 	let active_state = document.getElementById('state_select').value;
-
-		// 	for (var i = 0; i < states_centers.length; i++) {
-		// 		// This if statement depends on the format of your array
-		// 		if (states_centers[i][0] == active_state) {
-		// 			//console.log(states_centers[i][1]);
-		// 			fly_to_loc = states_centers[i][1];
-		// 		}
-		// 	}
-
-		// 	map.flyTo({
-		// 		center: [
-		// 			fly_to_loc[1] - .25,
-		// 			fly_to_loc[0]
-		// 		],
-		// 		zoom: fly_to_loc[2],
-		// 		speed: .5
-		// 	});
-
-		// });
-
-		// map.on('moveend', updateFragment);
+		map.on('moveend', updateFragment);
 	});
 </script>
 
