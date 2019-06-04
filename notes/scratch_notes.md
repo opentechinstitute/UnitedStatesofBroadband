@@ -1,13 +1,3 @@
-##TODO
-
-LATER (USBB map)
-- include ross' NN layer
-- adoption data
-- annotation layer
-- district one pager
-- adoption data, census data
-
-
 ##Notes for USBB Process
 
 more mapping notes
