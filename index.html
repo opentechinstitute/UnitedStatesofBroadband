@@ -137,24 +137,6 @@
 		<h2>United States of Broadband</h2>
 		<label for="measurement">Data <abbr title="Choose the measurement to show on the map.">?</abbr></label>
 		<select id="measurement" name="measurement">
-		  <optgroup label="M-Lab" id="mlab">
-			<option value="download_Mbps_">M-Lab Download Median (Mbps)</option>
-			<option value="upload_Mbps_">M-Lab Upload Median (Mbps)</option>
-			<option value="min_rtt_">M-Lab RTT</option>
-			<option value="dl_count_tests_">M-Lab Download Tests (count)</option>
-			<option value="ul_count_tests_">M-Lab Upload Tests (count)</option>
-			<option value="dl_count_ips_">M-Lab Download IPs (count)</option>
-			<option value="ul_count_ips_">M-Lab Upload IPs (count)</option>
-		  </optgroup>
-		  <optgroup label="FCC Data" id="fcc">
-			<option value="advertised_down_">FCC Advertised Download Median (Mbps)</option>
-			<option value="advertised_up_">FCC Advertised Upload Median (Mbps)</option>
-			<!-- <option value="provider_count_">Number of Providers (count)</option> -->
-		  </optgroup>
-		  <optgroup label="Comparison of M-Lab & FCC" id="difference">
-		  	<option value="compare_down_">Difference (FCC - MLab) Download Medians</option>
-		  	<option value="compare_up_">Difference (FCC - MLab) Upload Medians</option>
-		  </optgroup>
 		</select>
 		<div style="width:100%;">
 		<details>
@@ -165,28 +147,16 @@
 		</div>
 		<label for="geo">Area <abbr title="Choose the detail level of the places on the map.">?</abbr></label> 
 		<select id="geo" name="geo">
-		  <option value="county">County</option>
-		  <option value="congress">Congressional Districts</option>
-		  <option value="state_house">State House</option>
-		  <option value="state_senate">State Senate</option>
-		  <option value="census_tract">Census Tract</option>
-		  <option value="zcta">Zip Code</option>
 		</select>
 		<label for="slider">Time Period <abbr title="Choose the time period to show on the map.">?</abbr></label>
 		<label id='time_period'></label>
-		<input id='slider' type='range' min='0' max='8' step='1' value='8' />
+		<input id='slider' type='range' />
 		<label for="state_select">Zoom to State <abbr title="Center the map on a specific state.">?</abbr></label>
 		<select id="state_select" name="state_select">
 		</select>
-		<!-- Dataset: <select id="data" name="data">
-		  <option value="mlab" id="mlab">Measurement Lab</option>
-		  <option value="fcc" id="fcc">FCC 477</option>
-		  <option value="nn_state_bills">Net Neutrality Bills by State</option>
-		</select> -->
 
 		<div class='session'>
 		  <h3>Data Range</h3>
-		  Units: (Mbps)
 		  <div id='legend' class='row colors'>
 		  </div>
 		  <div id="legendlabel" class='row labels'>
@@ -210,169 +180,10 @@ var map = new mapboxgl.Map({
     center: [-97.754807, 38.674870]
 });
 
-var time_periods = [['dec_2014','Dec 2014'],
-					['jun_2015','Jun 2015'],
-					['dec_2015','Dec 2015'],
-					['jun_2016','Jun 2016'],
-					['dec_2016','Dec 2016'],
-					['jun_2017','Jun 2017'],
-					['dec_2017','Dec 2017'],
-					['jun_2018','Jun 2018'],
-					['dec_2018','Dec 2018']];
+// The function that will be called when the user clicks on the map.  The feature under the mouse is passed in.
+var popupFn;
 
-var states = ["All States","Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
-
-var popupTemplate;
-
-var states_centers = [
-	["All States", [38.526600, -96.726486, 3]],
-	["Alabama", [32.806671, -86.791130, 6]],
-    ["Alaska", [61.370716, -152.404419, 3]],
-    ["Arizona", [33.96, -112.93, 5]],
-    ["Arkansas", [34.969704, -92.373123, 5]],
-    ["California", [37.56, -120.70, 5]],
-    ["Colorado", [38.96, -106.95, 5.5]],
-    ["Connecticut", [41.597782, -72.755371, 5]],
-    ["Delaware", [39.318523, -75.507141, 7]],
-    ["District of Columbia", [38.897438, -77.026817, 10]],
-    ["Florida", [27.766279, -84.40, 5]],
-    ["Georgia", [33.040619, -83.643074, 5]],
-    ["Hawaii", [21.094318, -157.498337, 5]],
-    ["Idaho", [44.240459, -114.478828, 5]],
-    ["Illinois", [40.349457, -88.986137, 5]],
-    ["Indiana", [39.849426, -86.258278, 5]],
-    ["Iowa", [42.011539, -93.210526, 5]],
-    ["Kansas", [38.526600, -96.726486, 5]],
-    ["Kentucky", [37.668140, -84.670067, 5]],
-    ["Louisiana", [31.169546, -91.867805, 5]],
-    ["Maine", [45.33, -69.48, 6]],
-    ["Maryland", [39.063946, -76.802101, 5]],
-    ["Massachusetts", [42.230171, -71.530106, 5]],
-    ["Michigan", [43.326618, -87.40, 5.5]],
-    ["Minnesota", [45.694454, -93.900192, 5]],
-    ["Mississippi", [32.741646, -89.678696, 6]],
-    ["Missouri", [38.456085, -92.288368, 5]],
-    ["Montana", [46.921925, -110.454353, 5]],
-    ["Nebraska", [41.125370, -98.268082, 5]],
-    ["Nevada", [38.313515, -117.055374, 5]],
-    ["New Hampshire", [43.452492, -71.563896, 5]],
-    ["New Jersey", [40.298904, -74.521011, 5]],
-    ["New Mexico", [34.840515, -106.248482, 5]],
-    ["New York", [42.165726, -74.948051, 5]],
-    ["North Carolina", [35.630066, -79.806419, 5]],
-    ["North Dakota", [47.528912, -99.784012, 5]],
-    ["Ohio", [40.388783, -82.764915, 5]],
-    ["Oklahoma", [35.565342, -96.928917, 5]],
-    ["Oregon", [44.572021, -122.070938, 5]],
-    ["Pennsylvania", [40.70, -78.78, 6]],
-    ["Puerto Rico", [18.155,-66.6963, 7]],
-    ["Rhode Island", [41.680893, -71.511780, 7]],
-    ["South Carolina", [33.856892, -80.945007, 5]],
-    ["South Dakota", [44.299782, -99.438828, 5]],
-    ["Tennessee", [35.747845, -86.692345, 5]],
-    ["Texas", [31.054487, -101.33, 5]],
-    ["Utah", [40.150032, -111.862434, 5]],
-    ["Vermont", [44.045876, -72.710686, 5]],
-    ["Virginia", [37.769337, -78.169968, 5]],
-    ["Washington", [47.400902, -121.490494, 5]],
-    ["West Virginia", [38.491226, -80.954453, 5]],
-    ["Wisconsin", [44.268543, -89.616508, 5]],
-    ["Wyoming", [42.755966, -107.302490], 5]];
-
-var ramps = {
-	'download_Mbps_': [-Infinity, '#fff',
-				0.2, '#ffff5e',
-				4, '#EED322',
-				10, '#E6B71E',
-				25, '#B86B25',
-				50, '#8B4225',
-				100, '#723122'],
-	'upload_Mbps_': [-Infinity, '#fff',
-				0.2, '#ffff91',
-				1, '#ffff5e',
-				3, '#EED322',
-				5, '#E6B71E',
-				10, '#B86B25',
-				25, '#8B4225',
-				50, '#723122',
-				100, '#612717'],
-	'min_rtt_': [0, '#723122',
-				5, '#8B4225',
-				10, '#B86B25',
-				25, '#E6B71E',
-				50, '#EED322',
-				100, '#ffff5e',
-				300, '#fff'],
-	'dl_count_tests_': [100, '#fff',
-				500, '#EED322',
-				1000, '#E6B71E',
-				5000, '#B86B25',
-				10000, '#8B4225',
-				25000, '#723122'],
-	'ul_count_tests_': [100, '#fff',
-				500, '#EED322',
-				1000, '#E6B71E',
-				5000, '#B86B25',
-				10000, '#8B4225',
-				25000, '#723122'],
-	'dl_count_ips_': [100, '#fff',
-				500, '#EED322',
-				1000, '#E6B71E',
-				5000, '#B86B25',
-				10000, '#8B4225',
-				25000, '#723122'],
-	'ul_count_ips_': [100, '#fff',
-				500, '#EED322',
-				1000, '#E6B71E',
-				5000, '#B86B25',
-				10000, '#8B4225',
-				25000, '#723122'],
-	'provider_count_': [0, '#fff',
-				1, '#EED322',
-				5, '#E6B71E',
-				10, '#B86B25',
-				25, '#8B4225',
-				50, '#723122'],
-	'advertised_down_': [-Infinity, '#fff',
-				0.2, '#ffff5e',
-				4, '#EED322',
-				10, '#E6B71E',
-				25, '#B86B25',
-				50, '#8B4225',
-				100, '#723122'],
-	'advertised_up_': [-Infinity, '#fff',
-				0.2, '#ffff91',
-				1, '#ffff5e',
-				3, '#EED322',
-				5, '#E6B71E',
-				10, '#B86B25',
-				25, '#8B4225',
-				50, '#723122'],
-	'compare_up_': [-Infinity, '#8c510a',
-				-25, '#8c510a',
-				-15, '#bf812d',
-				-10, '#dfc27d',
-				-5, '#f6e8c3',
-				-1, '#f5f5f5',
-				1, '#c7eae5',
-				5, '#80cdc1',
-				10, '#35978f',
-				15, '#01665e',
-				25, '#003b34'],
-	'compare_down_': [-Infinity, '#8c510a',
-				-25, '#8c510a',
-				-15, '#bf812d',
-				-10, '#dfc27d',
-				-5, '#f6e8c3',
-				-1, '#f5f5f5',
-				1, '#c7eae5',
-				5, '#80cdc1',
-				10, '#35978f',
-				15, '#01665e',
-				25, '#003b34']
-};
-
-	function mlabPopupTemplate(props) {
+	function mlabPopupFn(props) {
 		function rate(key) {
 			if (key in props) {
 				return `${props[key].toFixed(2)} Mbps`;
@@ -407,7 +218,7 @@ var ramps = {
 		);
 	}
 
-	function fccPopupTemplate(props) {
+	function fccPopupFn(props) {
 		function rate(key) {
 			if (key in props) {
 				return `${props[key].toFixed(2)} Mbps`;
@@ -439,7 +250,7 @@ var ramps = {
 		);
 	}
 
-	function diffPopupTemplate(props){
+	function diffPopupFn(props){
 		function rate(key1,key2) {
 			if (key1 in props && key2 in props) {
 				let diff = props[key1]-props[key2];
@@ -472,593 +283,484 @@ var ramps = {
 		);
 	}
 
-function makeColorRamp(){
-		
-		var measureGroup = document.getElementById('measurement');
-		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
-		var measure = document.getElementById('measurement').value;
-		var state = document.getElementById('state_select').value;
-		var time_period = time_periods[document.getElementById('slider').value];
-		var field;
-		var filter;
-		
-		if( dataset == 'fcc'){
-			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
-			for (let opt of document.querySelectorAll('select#geo option')) {
-				opt.disabled = unsupported_geos.includes(opt.value);
+	function mkRamp({
+		displayName, internalName, popupFn, mapboxGlStyleFn, stops, maxTime
+	}) {
+		const styleFn = mapboxGlStyleFn;
+		return {
+			displayName, internalName, popupFn, stops, maxTime, mapboxGlStyleFn(timePeriod) {
+				return styleFn(timePeriod, stops);
 			}
-			if (unsupported_geos.includes(document.getElementById('geo').value)) {
-				document.getElementById('geo').value = 'county';
-			}
-			document.getElementById('slider').max = 5;
-			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
-		    time_period = time_periods[document.getElementById('slider').value];
-			popupTemplate = fccPopupTemplate;
-			field = ['get', dataset + '_' + measure + time_period[0]];
-			filter = ['has', dataset + '_' + measure + time_period[0]];
-		} else if (dataset == 'mlab') {
-			for (let opt of document.querySelectorAll('select#geo option')) {
-				opt.disabled = false;
-			}
-			field = ['get', 'ml_' + measure + time_period[0]];
-			filter = ['has', 'ml_' + measure + time_period[0]];
-			document.getElementById('slider').max = 8;
-			popupTemplate = mlabPopupTemplate;
-		} else {
-			const unsupported_geos = ["congress", "state_house", "state_senate", "zcta"]; 
-			for (let opt of document.querySelectorAll('select#geo option')) {
-				opt.disabled = unsupported_geos.includes(opt.value);
-			}
-			if (unsupported_geos.includes(document.getElementById('geo').value)) {
-				document.getElementById('geo').value = 'county';
-			}
-			document.getElementById('slider').max = 5;
-			document.getElementById('slider').value = Math.min(5, document.getElementById('slider').value);		
-		    time_period = time_periods[document.getElementById('slider').value];
-			popupTemplate = diffPopupTemplate;
-			if(measure == 'compare_down_'){
-				field = ['-', ['get', 'fcc_advertised_down_' + time_period[0]], ['get', 'ml_download_Mbps_' + time_period[0]]];
-				filter = ['all', ['has', 'fcc_advertised_down_' + time_period[0]], ['has', 'ml_download_Mbps_' + time_period[0]]];
-			}
-			else {
-				field = ['-', ['get', 'fcc_advertised_up_' + time_period[0]], ['get', 'ml_upload_Mbps_' + time_period[0]]];
-				filter = ['all', ['has', 'fcc_advertised_up_' + time_period[0]], ['has', 'ml_upload_Mbps_' + time_period[0]]];
-			}
-		}
-
-		var geo_layer = dataset + '_' + document.getElementById('geo').value;
-
-
-		var ramp =	[ 'interpolate',
-			['linear'],
-			field,
-		];
-
-		ramp = ramp.concat(ramps[measure]);
-
-		//update map colors
-		map.setPaintProperty(geo_layer,'fill-color',ramp);
-
-		var legend_values = ramps[measure];
-
-		let cssRamp	= legend_values.filter((_, idx) => idx % 2 != 0).join(',');
-		cssRamp = `linear-gradient(to right, ${cssRamp})`;
-		
-        //update legend colors
-		document.getElementById('legend').style.background = cssRamp;
-
-        let cssLabels = [];
-        for(var i=0; i<legend_values.length; i+=2){
-        	cssLabels.push(legend_values[i]);
-        }
-		cssLabels = cssLabels.filter((breakValue) => Number.isFinite(breakValue));
-
-		//update legend values
-		document.getElementById('legendlabel').innerHTML = cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
-
-		//show one layer
-		for( let lyr of ['mlab_zcta','mlab_census_tract','mlab_state_senate','mlab_state_house','mlab_congress','fcc_census_tract','fcc_county','mlab_nn_state_bills','difference_county','difference_census_tract','mlab_county', 'usbb_zcta']){
-			map.setLayoutProperty(lyr,'visibility','none');
 		};
-		map.setLayoutProperty(geo_layer,'visibility','visible');
-		
-		//filter out nulls
-		map.setFilter(geo_layer,filter);
-
-		// Set the label to the month
-		document.getElementById('time_period').textContent = time_period[1];
-}
-
-
-map.on('load', function () {
-
-	var layers = map.getStyle().layers;
-	// Find the index of the first symbol layer in the map style
-	var firstSymbolId;
-	for (var i = 0; i < layers.length; i++) {
-		if (layers[i].type === 'symbol') {
-		firstSymbolId = layers[i].id;
-		break;
-		}
 	}
 
-	// add states to selector
-	 var c = document.getElementById('state_select');
-	 for (var s in states) {
-	     var option = document.createElement('option');
-	     option.value = states[s];
-	     option.innerHTML = states[s];
-	     c.appendChild(option);
-	 }
-
-    map.addLayer({
-        "id": "mlab_county",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.d02bt0xr'
-        },
-        "source-layer": "mlab_county_2014_2018_429",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
+	var config = {
+		time_periods: // time periods, as an array of [internalName, displayName]
+			[['dec_2014', 'Dec 2014'],
+			['jun_2015', 'Jun 2015'],
+			['dec_2015', 'Dec 2015'],
+			['jun_2016', 'Jun 2016'],
+			['dec_2016', 'Dec 2016'],
+			['jun_2017', 'Jun 2017'],
+			['dec_2017', 'Dec 2017'],
+			['jun_2018', 'Jun 2018'],
+			['dec_2018', 'Dec 2018']],
+		state_centers: // jump-to-state info, an array of [displayName, [lon, lat, zoom]]
+			[
+				["All States", [38.526600, -96.726486, 3]],
+				["Alabama", [32.806671, -86.791130, 6]],
+				["Alaska", [61.370716, -152.404419, 3]],
+				["Arizona", [33.96, -112.93, 5]],
+				["Arkansas", [34.969704, -92.373123, 5]],
+				["California", [37.56, -120.70, 5]],
+				["Colorado", [38.96, -106.95, 5.5]],
+				["Connecticut", [41.597782, -72.755371, 5]],
+				["Delaware", [39.318523, -75.507141, 7]],
+				["District of Columbia", [38.897438, -77.026817, 10]],
+				["Florida", [27.766279, -84.40, 5]],
+				["Georgia", [33.040619, -83.643074, 5]],
+				["Hawaii", [21.094318, -157.498337, 5]],
+				["Idaho", [44.240459, -114.478828, 5]],
+				["Illinois", [40.349457, -88.986137, 5]],
+				["Indiana", [39.849426, -86.258278, 5]],
+				["Iowa", [42.011539, -93.210526, 5]],
+				["Kansas", [38.526600, -96.726486, 5]],
+				["Kentucky", [37.668140, -84.670067, 5]],
+				["Louisiana", [31.169546, -91.867805, 5]],
+				["Maine", [45.33, -69.48, 6]],
+				["Maryland", [39.063946, -76.802101, 5]],
+				["Massachusetts", [42.230171, -71.530106, 5]],
+				["Michigan", [43.326618, -87.40, 5.5]],
+				["Minnesota", [45.694454, -93.900192, 5]],
+				["Mississippi", [32.741646, -89.678696, 6]],
+				["Missouri", [38.456085, -92.288368, 5]],
+				["Montana", [46.921925, -110.454353, 5]],
+				["Nebraska", [41.125370, -98.268082, 5]],
+				["Nevada", [38.313515, -117.055374, 5]],
+				["New Hampshire", [43.452492, -71.563896, 5]],
+				["New Jersey", [40.298904, -74.521011, 5]],
+				["New Mexico", [34.840515, -106.248482, 5]],
+				["New York", [42.165726, -74.948051, 5]],
+				["North Carolina", [35.630066, -79.806419, 5]],
+				["North Dakota", [47.528912, -99.784012, 5]],
+				["Ohio", [40.388783, -82.764915, 5]],
+				["Oklahoma", [35.565342, -96.928917, 5]],
+				["Oregon", [44.572021, -122.070938, 5]],
+				["Pennsylvania", [40.70, -78.78, 6]],
+				["Puerto Rico", [18.155, -66.6963, 7]],
+				["Rhode Island", [41.680893, -71.511780, 7]],
+				["South Carolina", [33.856892, -80.945007, 5]],
+				["South Dakota", [44.299782, -99.438828, 5]],
+				["Tennessee", [35.747845, -86.692345, 5]],
+				["Texas", [31.054487, -101.33, 5]],
+				["Utah", [40.150032, -111.862434, 5]],
+				["Vermont", [44.045876, -72.710686, 5]],
+				["Virginia", [37.769337, -78.169968, 5]],
+				["Washington", [47.400902, -121.490494, 5]],
+				["West Virginia", [38.491226, -80.954453, 5]],
+				["Wisconsin", [44.268543, -89.616508, 5]],
+				["Wyoming", [42.755966, -107.302490], 5]],
+		geo_units: // Array of dynamic layer info, [displayName, layerId, layerSrc, internalLayerName]
+			[
+				['County', 'county', 'mapbox://newamerica.usbb_county', 'usbb_county'],
+				['Zip Code', 'zcta', 'mapbox://newamerica.usbb_zcta', 'usbb_zcta'],
+				// ['US Census Tracts', 'census_tracts', 'mapbox://newamerica.usbb_census_tract', 'usbb_census_tract'],
+				['Senate Districts', 'state_senate', 'mapbox://newamerica.usbb_state_senate', 'usbb_state_senate'],
+				['House Districts', 'state_house', 'mapbox://newamerica.usbb_state_house', 'usbb_state_house'],
+			],
+		ramps: // Array of display styling info, {displayName, internalName, mapboxGlStyleFn, stops, popupFn}
+			[mkRamp({
+				displayName: 'MLab Median Download',
+				internalName: 'mlab_download_Mbps',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [
+					-Infinity, '#fff',
+					0.2, '#ffff5e',
+					4, '#EED322',
+					10, '#E6B71E',
+					25, '#B86B25',
+					50, '#8B4225',
+					100, '#723122'
 				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_zcta",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.mlab_zcta'
-        },
-        "source-layer": "mlab_zcta",
-        //"filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
+			}), mkRamp({
+				displayName: 'MLab Median Upload',
+				internalName: 'mlab_upload_Mbps',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['case', 
+					    ['has', `ml_upload_Mbps_${timePeriod}`],
+						['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], ...stops],
+						'#00FF00'];
+				},
+				maxTime: 'dec_2018',
+				stops: [
+					-Infinity, '#fff',
+					0.2, '#ffff91',
+					1, '#ffff5e',
+					3, '#EED322',
+					5, '#E6B71E',
+					10, '#B86B25',
+					25, '#8B4225',
+					50, '#723122',
+					100, '#612717']
+			}), mkRamp({
+				displayName: 'MLab Median RTT',
+				internalName: 'mlab_min_rtt',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [0, '#723122',
+						5, '#8B4225',
+						10, '#B86B25',
+						25, '#E6B71E',
+						50, '#EED322',
+						100, '#ffff5e',
+						300, '#fff']
+			}), mkRamp({
+				displayName: 'MLab Download Test Count',
+				internalName: 'mlab_dl_count_tests',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [100, '#fff',
+						500, '#EED322',
+						1000, '#E6B71E',
+						5000, '#B86B25',
+						10000, '#8B4225',
+						25000, '#723122']
+			}), mkRamp({
+				displayName: 'MLab Upload Test Count',
+				internalName: 'mlab_ul_count_tests',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [100, '#fff',
+						500, '#EED322',
+						1000, '#E6B71E',
+						5000, '#B86B25',
+						10000, '#8B4225',
+						25000, '#723122']
+			}), mkRamp({
+				displayName: 'MLab Unique Download IPs',
+				internalName: 'mlab_dl_count_ips',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [100, '#fff',
+						500, '#EED322',
+						1000, '#E6B71E',
+						5000, '#B86B25',
+						10000, '#8B4225',
+						25000, '#723122']
+			}), mkRamp({
+				displayName: 'MLab Unique Upload IPs',
+				internalName: 'mlab_ul_count_ips',
+				popupFn: mlabPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2018',
+				stops: [100, '#fff',
+						500, '#EED322',
+						1000, '#E6B71E',
+						5000, '#B86B25',
+						10000, '#8B4225',
+						25000, '#723122']
+			}), mkRamp({
+				displayName: 'FCC Unique Provider Count',
+				internalName: 'fcc_provider_count',
+				popupFn: fccPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_provider_count_${timePeriod}`], ...stops];
+				}, 
+				maxTime: 'dec_2017',
+				stops: [0, '#fff',
+						1, '#EED322',
+						5, '#E6B71E',
+						10, '#B86B25',
+						25, '#8B4225',
+						50, '#723122']
+			}), mkRamp({
+				displayName: 'FCC Advertised Download Speed',
+				internalName: 'fcc_advertised_dl',
+				popupFn: fccPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2017',
+				stops: [-Infinity, '#fff',
+						0.2, '#ffff5e',
+						4, '#EED322',
+						10, '#E6B71E',
+						25, '#B86B25',
+						50, '#8B4225',
+						100, '#723122']
+			}), mkRamp({
+				displayName: 'FCC Advertised Upload Speed',
+				internalName: 'fcc_advertised_ul',
+				popupFn: fccPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], ...stops];
+				},
+				maxTime: 'dec_2017',
+				stops: [-Infinity, '#fff',
+						0.2, '#ffff91',
+						1, '#ffff5e',
+						3, '#EED322',
+						5, '#E6B71E',
+						10, '#B86B25',
+						25, '#8B4225',
+						50, '#723122']
+			}), mkRamp({
+				displayName: 'Download Comparison (FCC - MLab)',
+				internalName: 'mlab_fcc_dl_comp',
+				popupFn: diffPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return [
+						'interpolate',
+						['linear'],
+						['-', ['get', `fcc_advertised_down_${timePeriod}`], ['get', `ml_download_Mbps_${timePeriod}`]],
+						...stops
+					];
+				},
+				maxTime: 'dec_2017',
+				stops: [
+					-Infinity, '#8c510a',
+					-25, '#8c510a',
+					-15, '#bf812d',
+					-10, '#dfc27d',
+					-5, '#f6e8c3',
+					-1, '#f5f5f5',
+					1, '#c7eae5',
+					5, '#80cdc1',
+					10, '#35978f',
+					15, '#01665e',
+					25, '#003b34'
 				]
-        }
-    });
+			}), mkRamp({
+				displayName: 'Upload Comparison (FCC - MLab)',
+				internalName: 'mlab_fcc_ul_comp',
+				popupFn: diffPopupFn,
+				mapboxGlStyleFn(timePeriod, stops) {
+					return [
+						'interpolate',
+						['linear'],
+						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]], ...stops];
+				},
+				maxTime: 'dec_2017',
+				stops: [
+					-Infinity, '#8c510a',
+					-25, '#8c510a',
+					-15, '#bf812d',
+					-10, '#dfc27d',
+					-5, '#f6e8c3',
+					-1, '#f5f5f5',
+					1, '#c7eae5',
+					5, '#80cdc1',
+					10, '#35978f',
+					15, '#01665e',
+					25, '#003b34']
+			})
+			]
+	};
 
-    map.addLayer({
-        "id": "usbb_zcta",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.usbb_zcta'
-        },
-        "source-layer": "usbb_zcta",
-        //"filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_census_tract",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.mlab_census_tracts'
-        },
-        "source-layer": "mlab_census_tract",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_state_senate",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.cnjwiilp'
-        },
-        "source-layer": "mlab_statesenate_2014_2018_0430",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_state_house",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.8un1iy50'
-        },
-        "source-layer": "mlab_state_house_2014_2018_0430",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_congress",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.adctm77h'
-        },
-        "source-layer": "mlab_stats_by_congress_district",
-        "filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "paint": {
-            "fill-opacity": 0.7,
-            //"fill-outline-color": '#000',
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'ml_download_Mbps_dec_2018'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "mlab_nn_state_bills",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.cjv9o72qc0emy2rk1wfh1b3mm-4fzkl'
-        },
-        //"filter": ["has",'ml_download_Mbps_dec_2018'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "nn_state_bills",
-        "paint": {
-            "fill-color": "#60af83",
-            "fill-opacity": 0.3
-        }
-    });
-
-    map.addLayer({
-        "id": "fcc_census_tract",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.ale67zb4'
-        },
-        "filter": ["has",'fcc_advertised_down_jun_2017'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "fcc477_ct_json",
-        "paint": {
-            "fill-opacity": 0.7,
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'fcc_advertised_down_jun_2017'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "fcc_county",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.2lyzr0wd'
-        },
-        "filter": ["has",'fcc_advertised_down_jun_2017'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "fcc_477_county_2014_2017_0515",
-        "paint": {
-            "fill-opacity": 0.7,
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'fcc_advertised_down_jun_2017'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-    map.addLayer({
-        "id": "difference_census_tract",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.mlab_fcc_census_tracts'
-        },
-        "filter": ["has",'fcc_advertised_down_jun_2017'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "fcc_mlab_census_tract",
-        "paint": {
-            "fill-opacity": 0.7,
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'fcc_advertised_down_jun_2017'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-
-    map.addLayer({
-        "id": "difference_county",
-        "type": "fill",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.mlab_fcc_county'
-        },
-        "filter": ["has",'fcc_advertised_down_jun_2017'],
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "fcc_mlab_county",
-        "paint": {
-            "fill-opacity": 0.7,
-            "fill-color": [
-				'interpolate',
-				['linear'],
-				['get', 'fcc_advertised_down_jun_2017'],
-				0, '#fff',
-				10, '#EED322',
-				25, '#E6B71E',
-				50, '#B86B25',
-				75, '#8B4225',
-				100, '#723122'
-				]
-        }
-    });
-
-   map.addLayer({
-        "id": "us_states",
-        "type": "line",
-        "source": {
-            type: 'vector',
-            url: 'mapbox://newamerica.cjvopv39u05jt2wmna9mg5wz4-7j8om'
-        },
-        "layout": {
-			'visibility': 'visible'
-			},
-        "source-layer": "us_states",
-        "paint": {
-            "line-color": "#000",
-            "line-width": 0.5
-        }
-    });
-
-
-    // When a click event occurs on a feature in the states layer, open a popup at the
-	// location of the click, with description HTML from its properties.
-
-	var popup = new mapboxgl.Popup();
-
-	map.on('click', function (e) {
-		let f = map.queryRenderedFeatures(e.point);
-		if (f.length) {
-			popup.setLngLat(e.lngLat)
-			  .setHTML(popupTemplate(f[0].properties))
-			  .addTo(map);
-		}
-	});
-	 
-	// Change the cursor to a pointer when the mouse is over the states layer.
-	map.on('mouseenter', 'mlab_county', function () {
-		map.getCanvas().style.cursor = 'pointer';
-	});
-	 
-	// Change it back to a pointer when it leaves.
-	map.on('mouseleave', 'mlab_county', function () {
-		map.getCanvas().style.cursor = '';
-	});
-
-
-	// Read settings from URL, if any.
-	// :dataset/:geo/:timeperiod/:measure/:x/:y/:z
-	let fragment = window.location.hash;
-	if (fragment) {
-		const check = (v, test) => test(v) ? v : undefined;
-
-		const measureGroup = document.getElementById('measurement');
-		const dataset1 = measureGroup.options;
-		console.log(dataset1);
-
-		const datasetNames = Array.from(document.querySelectorAll("#data option")).map(el => el.value);
-		console.log(datasetNames);
-
-		const geoNames = Array.from(document.querySelectorAll("#geo option")).map(el => el.value);
-		const parts = fragment.slice(1).split("/");
-		const dataset = check(parts[0], (v) => datasetNames.indexOf(v) >= 0);
-		const geo = check(parts[1], (v) => geoNames.indexOf(v) >= 0);
-		const timeperiod = check(parts[2], (v) => time_periods.findIndex((x) => x[0] == v) >= 0);
-		const measure = check(parts[3], (v) => v in ramps);
-		const x = check(Number(parts[4]), (v) => !Number.isNaN(v));
-		const y = check(Number(parts[5]), (v) => !Number.isNaN(v));
-		const z = check(Number(parts[6]), (v) => !Number.isNaN(v));
-
-		if (dataset) {
-			document.querySelector(`#data [value='${dataset}']`).selected = true;
-		}
-		if (geo) {
-			document.querySelector(`#geo [value='${geo}']`).selected = true;
-		}
-		if (timeperiod !== undefined) {
-			document.getElementById('slider').value = time_periods.findIndex((x) => x[0] == timeperiod);
-		}
-		if (measure) {
-			document.querySelector(`#measurement [value='${measure}']`).selected = true;
-		}
-		if ([x,y,z].every(n => n !== undefined)) {
-			map.jumpTo({ center: [x, y], zoom: z });
-		}
-	}
-
-  // Encode the map state into the fragment for linkability.  Keep this in sync with the block above.
-  function updateFragment() {
+	// Encode the map state into the fragment for linkability.
+	function updateFragment() {
 		var measureGroup = document.getElementById('measurement');
-		const dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
 		const geo = document.getElementById("geo").value;
-		const timeperiod = time_periods[document.getElementById("slider").value][0];
+		const timeperiod = config.time_periods[document.getElementById("slider").value][0];
 		const measure = document.getElementById("measurement").value;
 		const { lng: x, lat: y } = map.getCenter();
 		const z = map.getZoom();
 		const url = new URL(window.location);
-		url.hash = `#${dataset}/${geo}/${timeperiod}/${measure}/${x.toFixed(2)}/${y.toFixed(2)}/${z.toFixed(2)}`;
+		url.hash = `#${geo}/${timeperiod}/${measure}/${x.toFixed(2)}/${y.toFixed(2)}/${z.toFixed(2)}`;
 		window.history.replaceState(undefined, 'USBB', url.toString());
 	}
 
-	// Run the color ramp to start
-	makeColorRamp();
+
+function configureMap() {
+	const measure = document.getElementById('measurement').value;
+	const geo = document.getElementById('geo').value;
+	const timeSlider = document.getElementById('slider');
+
+	const ramp = config.ramps.find((ramp) => ramp.internalName == measure);
+
+  // Apply time constraint and clamp value.
+  const maxTimeIndex = config.time_periods.findIndex((period) => period[0] == ramp.maxTime);
+	console.log(ramp.maxTime, maxTimeIndex, config.time_periods.length);
+  timeSlider.max = maxTimeIndex == -1 ? config.time_periods.length - 1 : maxTimeIndex;
+	timeSlider.value = Math.min(timeSlider.max, timeSlider.value);
+
+	const timePeriod = config.time_periods[timeSlider.value];
+
+	const style = ramp.mapboxGlStyleFn(timePeriod[0]);
+
+    // Apply layer visibility and style.
+	for (const layer of config.geo_units) {
+		map.setLayoutProperty(layer[1], 'visibility', layer[1] == geo ? 'visible' : 'none');
+		map.setPaintProperty(layer[1], 'fill-color', style);
+	}
+	// Update popup template.
+	popupFn = ramp.popupFn;
+	// Update legend.
+	const breaks = ramp.stops;
+	const cssRamp = breaks.filter((_, idx) => idx % 2).join(',');
+	document.getElementById('legend').style.background =
+	  `linear-gradient(to right, ${cssRamp})`;
+	const cssLabels = breaks.filter((_, idx) => !(idx % 2)).filter(b => Number.isFinite(b));
+	document.getElementById('legendlabel').innerHTML =
+		cssLabels.map((l) => `<div class="label">${l}</div>`).join('');
 	
-	// change things based on selection in the legend
-	document.getElementById('slider').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-	document.getElementById('measurement').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-	document.getElementById('geo').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-	//document.getElementById('data').addEventListener('input', function(e) { makeColorRamp(); updateFragment() });
-	
-	//flyto
-	document.getElementById('state_select').addEventListener('input', function(e) { 
-	// Fly to a random location by offsetting the point -74.50, 40
-	// by up to 5 degrees.
-		
-		let active_state = document.getElementById('state_select').value;
+	// Update time period label.
+	document.getElementById('time_period').innerText = timePeriod[1];
 
-	    for (var i = 0; i < states_centers.length; i++) {
-	        // This if statement depends on the format of your array
-	        if (states_centers[i][0] == active_state) {
-	            //console.log(states_centers[i][1]);
-	            fly_to_loc = states_centers[i][1];
-	        }
-	    }
+	// Update fragment.
+	updateFragment();
+}
 
-		map.flyTo({
-	        center: [
-	            fly_to_loc[1]-.25,
-	            fly_to_loc[0]
-	        ],
-	        zoom: fly_to_loc[2],
-	        speed: .5
-    	});
+    const measureSelect = document.getElementById('measurement');
+	for (const {displayName,internalName} of config.ramps) {
+		const opt = document.createElement('option')
+		opt.value = internalName;
+		opt.innerText = displayName;
+		measureSelect.appendChild(opt);
+	}
+	const geoSelect = document.getElementById('geo');
+	for (const [displayName, layerId, src, srcLyr] of config.geo_units) {
+		const opt = document.createElement('option');
+		opt.value = layerId;
+		opt.innerText = displayName;
+		geoSelect.appendChild(opt);
+	}
+	const timeSlider = document.getElementById('slider');
+	timeSlider.min = 0;
+	timeSlider.max = config.time_periods.length - 1;
+	timeSlider.step = 1;
+	const stateSelector = document.getElementById('state_select');
+	for (const [displayName, mapCoordinates] of config.state_centers) {
+		const opt = document.createElement('option');
+		opt.value = displayName;
+		opt.innerText = displayName;
+		stateSelector.appendChild(opt);
+	}
+	[measureSelect, geoSelect, timeSlider].forEach((el) => el.addEventListener('input', () => {
+		configureMap();
+	}))
+	stateSelector.addEventListener('input', (el) => {
+		const state = config.state_centers.find((row) => row[0] == stateSelector.value);
+		if (state) {
+			const [ lat, lon, zoom ] = state[1];
+			map.flyTo({
+				center: { lon, lat },
+				zoom
+			});
+		}
+	});
+	map.on('load', function () {
+		for (const [_, id, url, sourceLayer] of config.geo_units) {
+			map.addLayer({
+				id,
+				type: "fill",
+				source: { url, type: "vector" },
+				"source-layer": sourceLayer,
+				layout: { visibility: 'none' },
+				paint: {
+					'fill-opacity': 0.7
+				}
+			})
 
-	 });
+			// Change the cursor to a pointer when the mouse is over the states layer.
+			map.on('mouseenter', id, () => {
+				map.getCanvas().style.cursor = 'pointer';
+			});
 
-	map.on('moveend', updateFragment);
-});
+			// Change it back to a pointer when it leaves.
+			map.on('mouseleave', id, () => {
+				map.getCanvas().style.cursor = '';
+			});
+		}
+
+		map.addLayer({
+			"id": "us_states",
+			"type": "line",
+			"source": {
+				type: 'vector',
+				url: 'mapbox://newamerica.cjvopv39u05jt2wmna9mg5wz4-7j8om'
+			},
+			"layout": {
+				'visibility': 'visible'
+			},
+			"source-layer": "us_states",
+			"paint": {
+				"line-color": "#000",
+				"line-width": 0.5
+			}
+		});
+
+		var popup = new mapboxgl.Popup();
+
+        const layers = config.geo_units.map((g) => g[1]);
+		map.on('click', (e) => {
+			let f = map.queryRenderedFeatures(e.point, {layers});
+			if (f.length) {
+				console.log(f[0]);
+				popup.setLngLat(e.lngLat)
+					.setHTML(popupFn(f[0].properties))
+					.addTo(map);
+			}
+		});
+
+
+
+		// Read settings from URL, if any.
+		// :geo/:timeperiod/:measure/:x/:y/:z
+		let fragment = window.location.hash;
+		if (fragment) {
+			const check = (v, test) => test(v) ? v : undefined;
+
+			const parts = fragment.slice(1).split("/");
+			const geo = check(parts[0], (v) => config.geo_units.some((u) => u[1] == v));
+			const timeperiod = check(parts[1], (v) => config.time_periods.some((x) => x[0] == v));
+			const measure = check(parts[2], (v) => config.ramps.some((r) => r.internalName == v));
+			const x = check(Number(parts[3]), (v) => !Number.isNaN(v));
+			const y = check(Number(parts[4]), (v) => !Number.isNaN(v));
+			const z = check(Number(parts[5]), (v) => !Number.isNaN(v));
+
+			if (geo) {
+				const el = document.querySelector(`#geo [value='${geo}']`) || document.querySelector(`#geo :first-child`);
+				el.selected = true;
+			}
+			if (timeperiod !== undefined) {
+				const idx = config.time_periods.findIndex((x) => x[0] == timeperiod);
+				if (idx >= 0) {
+					document.getElementById('slider').value = idx
+				};
+			}
+			if (measure) {
+				const el = document.querySelector(`#measurement [value='${measure}']`) || document.querySelector(`#measurement :first-child`);
+				el.selected = true;
+			}
+			if ([x, y, z].every(n => n !== undefined)) {
+				map.jumpTo({ center: [x, y], zoom: z });
+			}
+		}
+		// Run the color ramp to start
+		configureMap();
+
+		map.on('moveend', updateFragment);
+	});
 </script>
 
 </body>
