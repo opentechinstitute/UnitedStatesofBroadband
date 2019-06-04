@@ -284,11 +284,11 @@ var popupFn;
 	}
 
 	function mkRamp({
-		displayName, internalName, popupFn, mapboxGlStyleFn, stops
+		displayName, internalName, popupFn, mapboxGlStyleFn, stops, maxTime
 	}) {
 		const styleFn = mapboxGlStyleFn;
 		return {
-			displayName, internalName, popupFn, stops, mapboxGlStyleFn(timePeriod) {
+			displayName, internalName, popupFn, stops, maxTime, mapboxGlStyleFn(timePeriod) {
 				return styleFn(timePeriod, stops);
 			}
 		};
@@ -376,6 +376,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [
 					-Infinity, '#fff',
 					0.2, '#ffff5e',
@@ -395,6 +396,7 @@ var popupFn;
 						['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], ...stops],
 						'#00FF00'];
 				},
+				maxTime: 'dec_2018',
 				stops: [
 					-Infinity, '#fff',
 					0.2, '#ffff91',
@@ -412,6 +414,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [0, '#723122',
 						5, '#8B4225',
 						10, '#B86B25',
@@ -426,6 +429,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
@@ -439,6 +443,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
@@ -452,6 +457,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
@@ -465,6 +471,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2018',
 				stops: [100, '#fff',
 						500, '#EED322',
 						1000, '#E6B71E',
@@ -478,6 +485,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `fcc_provider_count_${timePeriod}`], ...stops];
 				}, 
+				maxTime: 'dec_2017',
 				stops: [0, '#fff',
 						1, '#EED322',
 						5, '#E6B71E',
@@ -491,6 +499,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2017',
 				stops: [-Infinity, '#fff',
 						0.2, '#ffff5e',
 						4, '#EED322',
@@ -505,6 +514,7 @@ var popupFn;
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], ...stops];
 				},
+				maxTime: 'dec_2017',
 				stops: [-Infinity, '#fff',
 						0.2, '#ffff91',
 						1, '#ffff5e',
@@ -525,6 +535,7 @@ var popupFn;
 						...stops
 					];
 				},
+				maxTime: 'dec_2017',
 				stops: [
 					-Infinity, '#8c510a',
 					-25, '#8c510a',
@@ -548,6 +559,7 @@ var popupFn;
 						['linear'],
 						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]], ...stops];
 				},
+				maxTime: 'dec_2017',
 				stops: [
 					-Infinity, '#8c510a',
 					-25, '#8c510a',
@@ -581,10 +593,18 @@ var popupFn;
 function configureMap() {
 	const measure = document.getElementById('measurement').value;
 	const geo = document.getElementById('geo').value;
-	const timeIndex = document.getElementById('slider').value;
-	const timePeriod = config.time_periods[timeIndex];
+	const timeSlider = document.getElementById('slider');
 
 	const ramp = config.ramps.find((ramp) => ramp.internalName == measure);
+
+  // Apply time constraint and clamp value.
+  const maxTimeIndex = config.time_periods.findIndex((period) => period[0] == ramp.maxTime);
+	console.log(ramp.maxTime, maxTimeIndex, config.time_periods.length);
+  timeSlider.max = maxTimeIndex == -1 ? config.time_periods.length - 1 : maxTimeIndex;
+	timeSlider.value = Math.min(timeSlider.max, timeSlider.value);
+
+	const timePeriod = config.time_periods[timeSlider.value];
+
 	const style = ramp.mapboxGlStyleFn(timePeriod[0]);
 
     // Apply layer visibility and style.
@@ -695,6 +715,7 @@ function configureMap() {
 		map.on('click', (e) => {
 			let f = map.queryRenderedFeatures(e.point, {layers});
 			if (f.length) {
+				console.log(f[0]);
 				popup.setLngLat(e.lngLat)
 					.setHTML(popupFn(f[0].properties))
 					.addTo(map);
