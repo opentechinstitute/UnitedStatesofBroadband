@@ -364,17 +364,20 @@ var popupFn;
 			[
 				['County', 'county', 'mapbox://newamerica.usbb_county', 'usbb_county'],
 				['Zip Code', 'zcta', 'mapbox://newamerica.usbb_zcta', 'usbb_zcta'],
-				// ['US Census Tracts', 'census_tracts', 'mapbox://newamerica.usbb_census_tract', 'usbb_census_tract'],
-				['Senate Districts', 'state_senate', 'mapbox://newamerica.usbb_state_senate', 'usbb_state_senate'],
-				['House Districts', 'state_house', 'mapbox://newamerica.usbb_state_house', 'usbb_state_house'],
+			    ['US Census Tracts', 'census_tracts', 'mapbox://newamerica.usbb_tract', 'usbb_tract'],
+				['State Senate Districts', 'state_senate', 'mapbox://newamerica.usbb_state_senate', 'usbb_state_senate'],
+				['State House Districts', 'state_house', 'mapbox://newamerica.usbb_state_house', 'usbb_state_house'],
 			],
 		ramps: // Array of display styling info, {displayName, internalName, mapboxGlStyleFn, stops, popupFn}
 			[mkRamp({
 				displayName: 'MLab Median Download',
-				internalName: 'mlab_download_Mbps',
+				internalName: 'ml_download_Mbps',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_download_Mbps_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_download_Mbps_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [
@@ -388,13 +391,13 @@ var popupFn;
 				]
 			}), mkRamp({
 				displayName: 'MLab Median Upload',
-				internalName: 'mlab_upload_Mbps',
+				internalName: 'ml_upload_Mbps',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
 					return ['case', 
 					    ['has', `ml_upload_Mbps_${timePeriod}`],
 						['interpolate', ['linear'], ['get', `ml_upload_Mbps_${timePeriod}`], ...stops],
-						'#00FF00'];
+						'#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [
@@ -412,7 +415,10 @@ var popupFn;
 				internalName: 'mlab_min_rtt',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_min_rtt_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_min_rtt_${timePeriod}`], ...stops],
+						'#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [0, '#723122',
@@ -427,7 +433,10 @@ var popupFn;
 				internalName: 'mlab_dl_count_tests',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_dl_count_tests_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_dl_count_tests_${timePeriod}`], ...stops],
+						'#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [100, '#fff',
@@ -441,7 +450,10 @@ var popupFn;
 				internalName: 'mlab_ul_count_tests',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_ul_count_tests_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_ul_count_tests_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [100, '#fff',
@@ -455,7 +467,10 @@ var popupFn;
 				internalName: 'mlab_dl_count_ips',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_dl_count_ips_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_dl_count_ips_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [100, '#fff',
@@ -469,7 +484,10 @@ var popupFn;
 				internalName: 'mlab_ul_count_ips',
 				popupFn: mlabPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `ml_ul_count_ips_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `ml_ul_count_ips_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2018',
 				stops: [100, '#fff',
@@ -483,7 +501,10 @@ var popupFn;
 				internalName: 'fcc_provider_count',
 				popupFn: fccPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `fcc_provider_count_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `fcc_reg_provider_count_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `fcc_reg_provider_count_${timePeriod}`], ...stops],
+					    '#808080'];
 				}, 
 				maxTime: 'dec_2017',
 				stops: [0, '#fff',
@@ -497,7 +518,10 @@ var popupFn;
 				internalName: 'fcc_advertised_dl',
 				popupFn: fccPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `fcc_advertised_down_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `fcc_advertised_down_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2017',
 				stops: [-Infinity, '#fff',
@@ -512,7 +536,10 @@ var popupFn;
 				internalName: 'fcc_advertised_ul',
 				popupFn: fccPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], ...stops];
+					return ['case', 
+					    ['has', `fcc_advertised_up_${timePeriod}`],
+					    ['interpolate', ['linear'], ['get', `fcc_advertised_up_${timePeriod}`], ...stops],
+					    '#808080'];
 				},
 				maxTime: 'dec_2017',
 				stops: [-Infinity, '#fff',
@@ -528,12 +555,11 @@ var popupFn;
 				internalName: 'mlab_fcc_dl_comp',
 				popupFn: diffPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return [
-						'interpolate',
-						['linear'],
+					return ['case', 
+					    ['all', ['has', `fcc_advertised_down_${timePeriod}`], ['has', `ml_download_Mbps_${timePeriod}`]],
+					    ['interpolate',['linear'],
 						['-', ['get', `fcc_advertised_down_${timePeriod}`], ['get', `ml_download_Mbps_${timePeriod}`]],
-						...stops
-					];
+						...stops],'#808080'];
 				},
 				maxTime: 'dec_2017',
 				stops: [
@@ -554,10 +580,10 @@ var popupFn;
 				internalName: 'mlab_fcc_ul_comp',
 				popupFn: diffPopupFn,
 				mapboxGlStyleFn(timePeriod, stops) {
-					return [
-						'interpolate',
-						['linear'],
-						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]], ...stops];
+					return ['case', 
+					    ['all', ['has', `fcc_advertised_down_${timePeriod}`], ['has', `ml_download_Mbps_${timePeriod}`]],
+					    ['interpolate',['linear'],
+						['-', ['get', `fcc_advertised_up_${timePeriod}`], ['get', `ml_upload_Mbps_${timePeriod}`]], ...stops], '#808080'];
 				},
 				maxTime: 'dec_2017',
 				stops: [

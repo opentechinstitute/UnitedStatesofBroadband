@@ -1,22 +1,11 @@
 ##TODO
 
-LATER
-6) include ross' NN layer
-
-DONE
-3) fcc data
-    - only county & CT (or block) are doable, ATM
-    - Other geographies, need a more complex query
-7) include fly-to code
-9) encode the selections in the URL so that views can be shared
-1) fix zcta rendering
-2) fix census tracts rendering
-5) figure out appropriate breaks for layers
-5b) adapt legend based on layer
-8) unify filed names across tiles
-  - congress -- ml_ul/dl etc
-  - all -- Name == whatever is the right name at the geo
-4) comparison data
+LATER (USBB map)
+- include ross' NN layer
+- adoption data
+- annotation layer
+- district one pager
+- adoption data, census data
 
 
 ##Notes for USBB Process
