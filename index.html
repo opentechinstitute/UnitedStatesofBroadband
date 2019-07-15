@@ -241,7 +241,7 @@ var popupFn;
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div></div><div class="report-header">↑</div><div class="report-header">↓</div>' +
+			'<div></div><div class="report-header">↓</div><div class="report-header">↑</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
@@ -273,7 +273,7 @@ var popupFn;
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div></div><div class="report-header">↑</div><div class="report-header">↓</div>' +
+			'<div></div><div class="report-header">↓</div><div class="report-header">↑</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
