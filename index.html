@@ -11,19 +11,25 @@
         #map { position:absolute; top:0; bottom:0; width:100%; }
 
 		.map-overlay {
-		font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+		font: 14px/20px Arial;
 		position: absolute;
 		top: 0;
 		left: 0;
 		padding: 10px;
 		}
 		 
-		.map-overlay .map-overlay-inner, .map-overlay .citation {
+		.map-overlay, .map-overlay .citation {
 		background-color: #fff;
-		box-shadow:0 1px 2px rgba(0, 0, 0, 0.20);
-		border-radius: 3px;
+		box-shadow: unset;
+		border-radius: 0px;
 		padding: 10px;
 		margin-bottom: 10px;
+		}
+
+		.map-overlay-inner {
+			border-radius: 0px;
+			box-shadow: unset;
+			padding: 15px;
 		}
 
 		.map-overlay .map-overlay-inner input {
@@ -71,8 +77,15 @@
 		  width: 100%;
 		}
 
+		.noresultrow {
+			height: 10px;
+			width: 13%;
+			margin-top: 20px;
+			background: #808080;
+		}
+
 		.colors {
-		  background: linear-gradient(to right, #2dc4b2, #3bb3c3, #669ec4, #8b88b6, #a2719b, #aa5e79, #2dc4b2);
+		  background: #FFFFFF;
 		  margin-bottom: 5px;
 		}
 
@@ -85,6 +98,8 @@
 		  display: inline-block;
 		  flex: 1;
 		  text-align: center;
+		  margin-top: 5px;
+		  font-weight: bold;
 		}
 		#console {
 		  position: absolute;
@@ -93,18 +108,27 @@
 		  padding: 10px 20px;
 		  background-color: white;
 		}
+
+		.popup-box {
+			border-radius: 0px;
+			box-shadow: unset;
+		}
 		.report {
 			display: grid;
-			grid-template-columns: repeat(4, auto);
+			grid-template-columns: repeat(3, auto);
 			grid-column-gap: 0.5em;
 		}
 		.report-header {
-			grid-column: span 2;
 			font-weight: bold;
+			text-align: center;
 			border-bottom: 1px solid black;
 		}
 		.report-value {
 			text-align: end;
+			border-bottom: 1px dashed black;
+		}
+		.report-date {
+			text-align: left;
 		}
 		.report-key {
 			text-align: end;
@@ -156,7 +180,7 @@
 		</select>
 
 		<div class='session'>
-		  <h3>Data Range</h3>
+		  <h3>Legend</h3>
 		  <div id='legend' class='row colors'>
 		  </div>
 		  <div id="legendlabel" class='row labels'>
@@ -166,6 +190,11 @@
 		    <div class='label'>0</div>
 		    <div class='label'>0</div>
 		    <div class='label'>0</div>
+		  </div>
+		  <div id='noresultlegend' class='noresultrow'>
+		  </div>
+		  <div id="noresultlabel" class='row labels'>
+			  <div class='label'>No tests available in time period</div>
 		  </div>
 		</div>
 	</div>
@@ -203,8 +232,8 @@ var popupFn;
 			["Dec 2018", "ml_download_Mbps_dec_2018", "ml_upload_Mbps_dec_2018"],
 		];
 		const formatRow = ([time, dl_key, ul_key]) =>
-			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
-			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
+			`<div class="report-date">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
+			`<div class="report-value">${rate(ul_key)}</div>`;
 
 		var measureGroup = document.getElementById('measurement');
 		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
@@ -212,7 +241,7 @@ var popupFn;
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			'<div></div><div class="report-header">↑</div><div class="report-header">↓</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
@@ -235,8 +264,8 @@ var popupFn;
 			["Jun 2017", "fcc_advertised_down_jun_2017", "fcc_advertised_up_jun_2017"],
 		];
 		const formatRow = ([time, dl_key, ul_key]) =>
-			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
-			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key)}</div>`;
+			`<div class="report-date">${time}</div><div class="report-value">${rate(dl_key)}</div>` +
+			`<div class="report-value">${rate(ul_key)}</div>`;
 
 		var measureGroup = document.getElementById('measurement');
 		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
@@ -244,7 +273,7 @@ var popupFn;
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div class="report-header">Download Speeds</div><div class="report-header">Upload Speeds</div>' +
+			'<div></div><div class="report-header">↑</div><div class="report-header">↓</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
@@ -268,8 +297,8 @@ var popupFn;
 			["Jun 2017", "fcc_advertised_down_jun_2017", "ml_download_Mbps_jun_2017", "fcc_advertised_up_jun_2017", "ml_upload_Mbps_jun_2017"]
 		];
 		const formatRow = ([time, dl_key_fcc, dl_key_mlab, ul_key_fcc, ul_key_mlab]) =>
-			`<div class="report-label">${time}</div><div class="report-value">${rate(dl_key_fcc,dl_key_mlab)}</div>` +
-			`<div class="report-label">${time}</div><div class="report-value">${rate(ul_key_fcc,ul_key_mlab)}</div>`;
+			`<div class="report-date">${time}</div><div class="report-value">${rate(dl_key_fcc,dl_key_mlab)}</div>` +
+			`<div class="report-value">${rate(ul_key_fcc,ul_key_mlab)}</div>`;
 
 		var measureGroup = document.getElementById('measurement');
 		var dataset = measureGroup.options[measureGroup.selectedIndex].parentNode.id;
@@ -277,7 +306,7 @@ var popupFn;
 		return ('<h2>' + (props['county_name'] || props['tract_name'] || props['name'] || props['NAME']) + '</h2>' +
 			'<em>Source:' + dataset + '</em>' +
 			'<div class="report">' +
-			'<div class="report-header">Download Difference</div><div class="report-header">Upload Difference</div>' +
+			'<div></div><div class="report-header">Download Difference</div><div class="report-header">Upload Difference</div>' +
 			rows.map(formatRow).join('\n') +
 			'</div>'
 		);
@@ -381,13 +410,13 @@ var popupFn;
 				},
 				maxTime: 'dec_2018',
 				stops: [
-					-Infinity, '#fff',
-					0.2, '#ffff5e',
-					4, '#EED322',
-					10, '#E6B71E',
-					25, '#B86B25',
-					50, '#8B4225',
-					100, '#723122'
+					-Infinity, '#cde5fa',
+					0.2, '#cde5fa',
+					4, '#78b2c6',
+					10, '#5299a9',
+					25, '#307f8a',
+					50, '#12666a',
+					100, '#004d47'
 				]
 			}), mkRamp({
 				displayName: 'MLab Median Upload',
@@ -401,15 +430,15 @@ var popupFn;
 				},
 				maxTime: 'dec_2018',
 				stops: [
-					-Infinity, '#fff',
-					0.2, '#ffff91',
-					1, '#ffff5e',
-					3, '#EED322',
-					5, '#E6B71E',
-					10, '#B86B25',
-					25, '#8B4225',
-					50, '#723122',
-					100, '#612717']
+					-Infinity, '#cde5fa',
+					0.2, '#acd2e8',
+					1, '#8cbfd4',
+					3, '#6facbf',
+					5, '#5299a9',
+					10, '#388692',
+					25, '#20737a',
+					50, '#0b6061',
+					100, '#004d47']
 			}), mkRamp({
 				displayName: 'MLab Min RTT',
 				internalName: 'mlab_min_rtt',
@@ -421,13 +450,13 @@ var popupFn;
 						'#808080'];
 				},
 				maxTime: 'dec_2018',
-				stops: [0, '#723122',
-						5, '#8B4225',
-						10, '#B86B25',
-						25, '#E6B71E',
-						50, '#EED322',
-						100, '#ffff5e',
-						300, '#fff']
+				stops: [0, '#cde5fa',
+						5, '#dfa8a9',
+						10, '#c78c8c',
+						25, '#b07070',
+						50, '#995556',
+						100, '#803a3c',
+						300, '#cde5fa']
 			}), mkRamp({
 				displayName: 'MLab Download Test Count',
 				internalName: 'mlab_dl_count_tests',
@@ -439,12 +468,12 @@ var popupFn;
 						'#808080'];
 				},
 				maxTime: 'dec_2018',
-				stops: [100, '#fff',
-						500, '#EED322',
-						1000, '#E6B71E',
-						5000, '#B86B25',
-						10000, '#8B4225',
-						25000, '#723122']
+				stops: [100, '#cde5fa',
+						500, '#99c7dc',
+						1000, '#69a8bb',
+						5000, '#3d8997',
+						10000, '#176b70',
+						25000, '#004d47']
 			}), mkRamp({
 				displayName: 'MLab Upload Test Count',
 				internalName: 'mlab_ul_count_tests',
@@ -456,12 +485,12 @@ var popupFn;
 					    '#808080'];
 				},
 				maxTime: 'dec_2018',
-				stops: [100, '#fff',
-						500, '#EED322',
-						1000, '#E6B71E',
-						5000, '#B86B25',
-						10000, '#8B4225',
-						25000, '#723122']
+				stops: [100, '#cde5fa',
+						500, '#99c7dc',
+						1000, '#69a8bb',
+						5000, '#3d8997',
+						10000, '#176b70',
+						25000, '#004d47']
 			}), mkRamp({
 				displayName: 'MLab Unique Download IPs',
 				internalName: 'mlab_dl_count_ips',
@@ -473,12 +502,12 @@ var popupFn;
 					    '#808080'];
 				},
 				maxTime: 'dec_2018',
-				stops: [100, '#fff',
-						500, '#EED322',
-						1000, '#E6B71E',
-						5000, '#B86B25',
-						10000, '#8B4225',
-						25000, '#723122']
+				stops: [100, '#cde5fa',
+						500, '#99c7dc',
+						1000, '#69a8bb',
+						5000, '#3d8997',
+						10000, '#176b70',
+						25000, '#004d47']
 			}), mkRamp({
 				displayName: 'MLab Unique Upload IPs',
 				internalName: 'mlab_ul_count_ips',
@@ -490,12 +519,12 @@ var popupFn;
 					    '#808080'];
 				},
 				maxTime: 'dec_2018',
-				stops: [100, '#fff',
-						500, '#EED322',
-						1000, '#E6B71E',
-						5000, '#B86B25',
-						10000, '#8B4225',
-						25000, '#723122']
+				stops: [100, '#cde5fa',
+						500, '#99c7dc',
+						1000, '#69a8bb',
+						5000, '#3d8997',
+						10000, '#176b70',
+						25000, '#004d47']
 			}), /*mkRamp({
 				displayName: 'FCC Unique Provider Count',
 				internalName: 'fcc_provider_count',
@@ -524,13 +553,14 @@ var popupFn;
 					    '#808080'];
 				},
 				maxTime: 'dec_2017',
-				stops: [-Infinity, '#fff',
-						0.2, '#ffff5e',
-						4, '#EED322',
-						10, '#E6B71E',
-						25, '#B86B25',
-						50, '#8B4225',
-						100, '#723122']
+				stops: [
+				-Infinity, '#cde5fa',
+					0.2, '#cde5fa',
+					4, '#78b2c6',
+					10, '#5299a9',
+					25, '#307f8a',
+					50, '#12666a',
+					100, '#004d47']
 			}), mkRamp({
 				displayName: 'FCC Advertised Upload Speed',
 				internalName: 'fcc_advertised_ul',
@@ -542,14 +572,14 @@ var popupFn;
 					    '#808080'];
 				},
 				maxTime: 'dec_2017',
-				stops: [-Infinity, '#fff',
-						0.2, '#ffff91',
-						1, '#ffff5e',
-						3, '#EED322',
-						5, '#E6B71E',
-						10, '#B86B25',
-						25, '#8B4225',
-						50, '#723122']
+				stops: [
+					-Infinity, '#cde5fa',
+					0.2, '#cde5fa',
+					4, '#78b2c6',
+					10, '#5299a9',
+					25, '#307f8a',
+					50, '#12666a',
+					100, '#004d47']
 			}), mkRamp({
 				displayName: 'Download Comparison (FCC - MLab)',
 				internalName: 'mlab_fcc_dl_comp',
@@ -563,17 +593,17 @@ var popupFn;
 				},
 				maxTime: 'dec_2017',
 				stops: [
-					-Infinity, '#8c510a',
-					-25, '#8c510a',
-					-15, '#bf812d',
-					-10, '#dfc27d',
-					-5, '#f6e8c3',
-					-1, '#f5f5f5',
-					1, '#c7eae5',
-					5, '#80cdc1',
-					10, '#35978f',
-					15, '#01665e',
-					25, '#003b34'
+					-Infinity, '#690408',
+					-25, '#96352d',
+					-15, '#be6256',
+					-10, '#e09287',
+					-5, '#f7c7bf',
+					-1, '#ffffff',
+					1, '#d2cdf2',
+					5, '#a39fdc',
+					10, '#7374be',
+					15, '#434d9b',
+					25, '#002a74'
 				]
 			}), mkRamp({
 				displayName: 'Upload Comparison (FCC - MLab)',
@@ -587,17 +617,18 @@ var popupFn;
 				},
 				maxTime: 'dec_2017',
 				stops: [
-					-Infinity, '#8c510a',
-					-25, '#8c510a',
-					-15, '#bf812d',
-					-10, '#dfc27d',
-					-5, '#f6e8c3',
-					-1, '#f5f5f5',
-					1, '#c7eae5',
-					5, '#80cdc1',
-					10, '#35978f',
-					15, '#01665e',
-					25, '#003b34']
+					-Infinity, '#690408',
+					-25, '#96352d',
+					-15, '#be6256',
+					-10, '#e09287',
+					-5, '#f7c7bf',
+					-1, '#ffffff',
+					1, '#d2cdf2',
+					5, '#a39fdc',
+					10, '#7374be',
+					15, '#434d9b',
+					25, '#002a74'
+				]
 			})
 			]
 	};
@@ -686,6 +717,10 @@ function configureMap() {
 	}))
 	stateSelector.addEventListener('input', (el) => {
 		const state = config.state_centers.find((row) => row[0] == stateSelector.value);
+		const state_geo = map.querySourceFeatures('us_states', {
+			source_layer: 'us_states',
+			filter: ['in', 'STATE', stateSelector.value]});
+		console.log(state_geo);
 		if (state) {
 			const [ lat, lon, zoom ] = state[1];
 			map.flyTo({
@@ -735,7 +770,7 @@ function configureMap() {
 			}
 		});
 
-		var popup = new mapboxgl.Popup();
+		var popup = new mapboxgl.Popup({className: "popup-box"});
 
         const layers = config.geo_units.map((g) => g[1]);
 		map.on('click', (e) => {
