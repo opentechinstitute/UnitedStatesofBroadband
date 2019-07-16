@@ -205,8 +205,10 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibmV3YW1lcmljYSIsImEiOiIyM3ZnYUtrIn0.57fFgg_iM
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/newamerica/cjpn4e4df2gak2rp7nef3am21',
-    zoom: 4,
-    center: [-97.754807, 38.674870]
+    bounds: new mapboxgl.LngLatBounds(
+		new mapboxgl.LngLat(-64.13512973018138, 55.068543614519314),
+		new mapboxgl.LngLat(-148.30882882584655, 18.958132980357163)
+	)
 });
 
 // The function that will be called when the user clicks on the map.  The feature under the mouse is passed in.
